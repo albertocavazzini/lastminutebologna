@@ -4,6 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Leaflet: Tailwind preflight imposta img { max-width: 100% } e rompe i tile OSM */
+.leaflet-container img {
+  max-width: none !important;
+}
+
 @layer base {
   :root {
     /* Cloud White — sezioni, mappa */

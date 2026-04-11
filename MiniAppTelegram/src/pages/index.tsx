@@ -333,6 +333,7 @@ const Index = () => {
                     <MapView
                       drops={radarDrops}
                       onSelectDrop={setSelectedDrop}
+                      userPos={userPos}
                     />
                   </Suspense>
                   {userPos &&
