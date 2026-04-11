@@ -1,5 +1,6 @@
-# Pubblica la mini app (build Vite) su GitHub Pages.
-# Dopo il primo deploy: Repo → Settings → Pages → Source: GitHub Actions.
+# Build della mini app e pubblicazione sul branch gh-pages (solo file di dist).
+# Così in Settings → Pages puoi usare "Deploy from a branch" → gh-pages / (root)
+# senza vedere il README del branch main.
 
 name: Deploy GitHub Pages
 
@@ -9,16 +10,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,18 +36,9 @@ jobs:
           npm ci
           npm run build
 
-      - uses: actions/configure-pages@v4
-
-      - uses: actions/upload-pages-artifact@v3
+      - name: Push dist to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: MiniAppTelegram/dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: MiniAppTelegram/dist
+          force_orphan: true

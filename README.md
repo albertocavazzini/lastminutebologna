@@ -4,19 +4,24 @@ Repository dedicata alla **grafica e al front-end** della mini app (cartella `Mi
 
 ## URL da usare nel bot (BotFather / Menu)
 
-Usa **esattamente** (con **slash finale**):
-
 `https://albertocavazzini.github.io/lastminutebologna/`
 
-Se in **Impostazioni → GitHub Pages** la sorgente è **“Deploy from a branch”** e nella root del repo non c’è un `index.html` generato dalla build, GitHub mostra solo il README (testo tipo “lastminutebologna”) invece dell’app.
+(Lo slash finale è opzionale; l’importante è che **non** sia l’URL del repository su `github.com`.)
 
-**Imposta la pubblicazione così:**
+## Pubblicazione su GitHub Pages (scegli così)
 
-1. Repository → **Settings** → **Pages**
-2. **Build and deployment** → **Source**: **GitHub Actions** (non “Deploy from a branch”)
-3. Dopo il primo workflow, in **Actions** potrebbe servire **un’approvazione** una tantum per l’ambiente `github-pages`
+Il workflow **Deploy GitHub Pages** compila la mini app e aggiorna il branch **`gh-pages`** solo con i file della build (`dist/`), **senza** questo README.
 
-Il deploy è definito in `.github/workflows/deploy-github-pages.yml` (build Vite in `MiniAppTelegram/` e upload della cartella `dist/`).
+1. Vai in **Settings** → **Pages**.
+2. **Build and deployment** → **Source**: **Deploy from a branch**.
+3. **Branch**: **`gh-pages`** → cartella **`/ (root)`** → Save.
+4. Attendi il primo run verde in **Actions** (dopo un push su `main` o da **Actions** → **Run workflow**). Se il branch non esiste ancora, lancialo una volta a mano.
+
+Se lasci **main** e **/ (root)**, GitHub mostra il README invece dell’app: è normale, perché in main non c’è `index.html` in root.
+
+### Alternativa: “GitHub Actions” come sorgente Pages
+
+Puoi anche usare **Source: GitHub Actions** con un workflow che usa `actions/deploy-pages` (versione precedente di questo repo). Con **`gh-pages`** + branch deploy di solito si evitano approvazioni ambiente e confusione col README.
 
 ## Sviluppo locale
 
