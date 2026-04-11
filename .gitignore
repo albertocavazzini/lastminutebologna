@@ -1,8 +1,20 @@
-node_modules/
-.DS_Store
-*.log
+# Su GitHub restano solo MiniAppTelegram + workflow Pages.
+# Apps Script / backend: solo in locale o su Google Apps Script (non versionati qui).
 
+/*
+!/.gitignore
+!/.github/
+!/.github/**
+!/MiniAppTelegram/
+!/MiniAppTelegram/**
+
+# MiniAppTelegram (build, segreti, dipendenze)
+MiniAppTelegram/node_modules/
 MiniAppTelegram/dist/
+MiniAppTelegram/dist-ssr/
 MiniAppTelegram/.env
 MiniAppTelegram/.env.local
 MiniAppTelegram/.env.*.local
+
+.DS_Store
+*.log
