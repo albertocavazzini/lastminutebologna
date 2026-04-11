@@ -1,7 +1,15 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Map, List, RefreshCw } from "lucide-react";
+import { Zap, Map, List, RefreshCw, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { Drop } from "@/data/mockDrops";
 import DropCard from "@/components/DropCard";
 import {
@@ -27,21 +35,19 @@ const Index = () => {
     null,
   );
   const [geoDone, setGeoDone] = useState(false);
+  const [geoDenied, setGeoDenied] = useState(false);
+  const [geoLoading, setGeoLoading] = useState(false);
 
   const webAppBase = projectEnv.appsScriptWebAppBase?.trim() ?? "";
 
-  const { data, isPending, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["miniapp-offerte", webAppBase],
-    queryFn: () => fetchMiniappOfferteJsonp(webAppBase),
-    staleTime: 30_000,
-    enabled: Boolean(webAppBase),
-  });
-
-  useEffect(() => {
+  const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setGeoDone(true);
+      setGeoDenied(false);
       return;
     }
+    setGeoLoading(true);
+    setGeoDone(false);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setUserPos({
@@ -49,11 +55,28 @@ const Index = () => {
           lng: pos.coords.longitude,
         });
         setGeoDone(true);
+        setGeoDenied(false);
+        setGeoLoading(false);
       },
-      () => setGeoDone(true),
-      { enableHighAccuracy: true, maximumAge: 60_000, timeout: 15_000 },
+      (err) => {
+        setGeoDone(true);
+        setGeoDenied(err.code === err.PERMISSION_DENIED);
+        setGeoLoading(false);
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 20_000 },
     );
   }, []);
+
+  useEffect(() => {
+    requestLocation();
+  }, [requestLocation]);
+
+  const { data, isPending, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["miniapp-offerte", webAppBase],
+    queryFn: () => fetchMiniappOfferteJsonp(webAppBase),
+    staleTime: 30_000,
+    enabled: Boolean(webAppBase),
+  });
 
   const radarDrops = useMemo(() => {
     if (!data?.ok || !data.offerte?.length || !userPos) return [];
@@ -128,26 +151,22 @@ const Index = () => {
               exit={{ opacity: 0 }}
             >
               {!webAppBase && (
-                <p className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-relaxed text-amber-900 dark:text-amber-100">
-                  <strong className="text-foreground">
-                    Manca l&apos;URL della web app Apps Script
-                  </strong>
-                  . Scegli <strong className="text-foreground">un</strong> modo:
-                  <br />
-                  <span className="font-mono text-[11px]">1)</span> file{" "}
-                  <span className="font-mono">MiniAppTelegram/public/runtime-config.json</span>{" "}
-                  → campo <span className="font-mono">appsScriptWebAppBase</span> con
-                  l&apos;URL <span className="font-mono">https://script.google.com/macros/s/…/exec</span>
-                  , poi commit e push (va bene in repo: è l&apos;endpoint pubblico).
-                  <br />
-                  <span className="font-mono text-[11px]">2)</span> in locale:{" "}
-                  <span className="font-mono">MiniAppTelegram/.env</span> con{" "}
-                  <span className="font-mono">VITE_APPS_SCRIPT_WEBAPP_BASE=…/exec</span>
-                  <br />
-                  <span className="font-mono text-[11px]">3)</span> su GitHub: secret{" "}
-                  <span className="font-mono">VITE_APPS_SCRIPT_WEBAPP_BASE</span> (Actions)
-                  e nuovo deploy.
-                </p>
+                <div className="mb-3 space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-xs leading-relaxed text-amber-900 dark:text-amber-100">
+                  <p>
+                    <strong className="text-foreground">URL web app mancante.</strong> Apri{" "}
+                    <span className="font-mono">MiniAppTelegram/public/runtime-config.json</span>
+                    , metti il tuo link{" "}
+                    <span className="font-mono">https://script.google.com/macros/s/…/exec</span>{" "}
+                    in <span className="font-mono">appsScriptWebAppBase</span>, poi commit e push.
+                  </p>
+                  <p className="text-[11px] opacity-90">
+                    Prova rapida senza commit: aggiungi alla fine dell&apos;indirizzo della mini
+                    app <span className="font-mono">#exec=</span> più l&apos;URL codificato con{" "}
+                    <span className="font-mono">encodeURIComponent</span> (anche da console
+                    browser). Oppure <span className="font-mono">.env</span> / secret GitHub{" "}
+                    <span className="font-mono">VITE_APPS_SCRIPT_WEBAPP_BASE</span>.
+                  </p>
+                </div>
               )}
 
               {webAppBase && (
@@ -184,16 +203,41 @@ const Index = () => {
                 </p>
               )}
 
-              {geoDone && webAppBase && data?.ok && !userPos && (
-                <p className="mb-3 rounded-xl border border-border/60 bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                  Abilita la{" "}
-                  <strong className="text-foreground">posizione</strong> per
-                  vedere sulla mappa e in elenco solo le offerte{" "}
-                  <strong className="text-foreground">
-                    attive adesso nel tuo raggio
-                  </strong>{" "}
-                  (stessa logica del radar sul bot: geohash + distanza massima).
-                </p>
+              {webAppBase && geoDone && !userPos && (
+                <div className="mb-3 space-y-3 rounded-xl border border-border/60 bg-muted/40 px-3 py-3">
+                  <p className="text-xs text-muted-foreground">
+                    {geoDenied ? (
+                      <>
+                        <strong className="text-foreground">Posizione bloccata.</strong> Su
+                        iPhone/Android apri le impostazioni di sistema per Telegram e consenti
+                        la posizione, oppure tocca di nuovo qui sotto dopo averlo abilitato.
+                      </>
+                    ) : (
+                      <>
+                        Su <strong className="text-foreground">Telegram</strong> il GPS spesso
+                        parte solo dopo un <strong className="text-foreground">tocco</strong>.
+                        Serve per il radar (geohash + distanza come sul bot).
+                      </>
+                    )}
+                  </p>
+                  {navigator.geolocation ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      className="w-full rounded-xl"
+                      disabled={geoLoading}
+                      onClick={() => requestLocation()}
+                    >
+                      <MapPin className="mr-2 h-4 w-4" strokeWidth={1.25} />
+                      {geoLoading ? "Rilevazione posizione…" : "Attiva posizione per il radar"}
+                    </Button>
+                  ) : (
+                    <p className="text-xs text-destructive">
+                      Questo dispositivo non espone la geolocalizzazione al browser.
+                    </p>
+                  )}
+                </div>
               )}
 
               {geoDone &&
@@ -235,9 +279,11 @@ const Index = () => {
                   <div className="mb-1 flex items-center gap-2">
                     <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
                     <span className="text-xs text-muted-foreground">
-                      {userPos
-                        ? `${radarDrops.length} offerte attive nel tuo raggio`
-                        : "Posizione richiesta per l'elenco radar"}
+                      {!webAppBase
+                        ? "Prima configura l'URL della web app (vedi sopra)"
+                        : userPos
+                          ? `${radarDrops.length} offerte attive nel tuo raggio`
+                          : "Tocca «Attiva posizione» per l'elenco radar"}
                     </span>
                   </div>
                   {userPos &&

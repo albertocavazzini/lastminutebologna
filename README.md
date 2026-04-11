@@ -40,6 +40,10 @@ L’URL della web app deve finire nella build, altrimenti vedi l’avviso giallo
 **A — File in repo (più semplice)**  
 Modifica `MiniAppTelegram/public/runtime-config.json`: in `appsScriptWebAppBase` metti l’URL `https://script.google.com/macros/s/…/exec`, commit e push. L’app lo legge a runtime (è l’endpoint pubblico della web app).
 
+**Prova senza commit:** apri la mini app con hash `#exec=` + URL codificato, ad es. in console  
+`encodeURIComponent('https://script.google.com/macros/s/TUO_ID/exec')`  
+e incolla il risultato dopo `#exec=`.
+
 **B — Secret GitHub (senza committare l’URL)**  
 1. **Settings** → **Secrets and variables** → **Actions** → **New repository secret**  
 2. Nome: `VITE_APPS_SCRIPT_WEBAPP_BASE` — valore: stesso URL `…/exec`  
