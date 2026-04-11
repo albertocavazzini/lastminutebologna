@@ -75,7 +75,7 @@ export default function App() {
         setLoading(false);
         setError(
           "L’app web non ha confermato il caricamento entro 20s.\n\n" +
-            "1) Nella root FlashDrop: VITE_SKIP_LOVABLE_TAGGER=1 nel file .env\n" +
+            "1) Nella cartella MiniAppTelegram: VITE_SKIP_LOVABLE_TAGGER=1 nel file .env\n" +
             "2) Riavvia `npm run dev`\n" +
             "3) Controlla i messaggi qui sotto (WIN_ERR / ROOT_ERROR).",
         );
@@ -87,11 +87,11 @@ export default function App() {
   const handleMessage = useCallback(
     (event: { nativeEvent: { data: string } }) => {
       const data = event.nativeEvent.data;
-      if (data === "FLASHDROP_READY") {
+      if (data === "LMB_APP_READY" || data === "FLASHDROP_READY") {
         readyRef.current = true;
         setLoading(false);
         setError(null);
-        pushDiag("FLASHDROP_READY");
+        pushDiag("LMB_APP_READY");
         return;
       }
       if (data.startsWith("ROOT_ERROR:")) {
@@ -115,7 +115,7 @@ export default function App() {
       const desc = e.nativeEvent.description;
       setError(
         desc ||
-          "Impossibile caricare la pagina. Avvia `npm run dev` nella root FlashDrop (porta 8080).",
+          "Impossibile caricare la pagina. Avvia `npm run dev` in MiniAppTelegram (porta 8080).",
       );
     },
     [],
@@ -180,7 +180,7 @@ export default function App() {
           <Text style={styles.hint}>In attesa dell’app…</Text>
           <Text style={styles.mono}>{uri}</Text>
           <Text style={styles.subhint}>
-            FlashDrop: npm run dev + .env con VITE_SKIP_LOVABLE_TAGGER=1
+            LastMinuteBologna: npm run dev in MiniAppTelegram + .env con VITE_SKIP_LOVABLE_TAGGER=1
           </Text>
         </View>
       )}

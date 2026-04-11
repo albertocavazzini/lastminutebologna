@@ -71,7 +71,7 @@ interface GoogleMapInnerProps {
 function GoogleMapInner({ apiKey, drops, onSelectDrop }: GoogleMapInnerProps) {
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: apiKey,
-    id: "flashdrop-map",
+    id: "lastminutebologna-map",
   });
 
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -203,7 +203,7 @@ function GoogleMapInner({ apiKey, drops, onSelectDrop }: GoogleMapInnerProps) {
               className="h-3 w-3 rounded-full border-2 border-white shadow-sm"
               style={{ backgroundColor: "#FF7E5F" }}
             />
-            <span className="text-muted-foreground">FlashDrop</span>
+            <span className="text-muted-foreground">Offerta</span>
           </div>
           <div className="flex items-center gap-2">
             <span

@@ -8,7 +8,7 @@ interface BottomNavProps {
 const tabs = [
   { id: "radar", icon: Map, label: "Mappa" },
   { id: "alerts", icon: Bell, label: "Alerts" },
-  { id: "merchant", icon: Rocket, label: "Launch" },
+  { id: "merchant", icon: Rocket, label: "Locale" },
   { id: "profile", icon: User, label: "Profile" },
 ];
 

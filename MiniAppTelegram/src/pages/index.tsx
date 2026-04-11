@@ -108,7 +108,7 @@ const Index = () => {
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" strokeWidth={1.25} />
             <h1 className="text-lg font-bold text-foreground tracking-tight">
-              Flash<span className="text-primary">Drop</span>
+              LastMinute<span className="text-primary">Bologna</span>
             </h1>
           </div>
 

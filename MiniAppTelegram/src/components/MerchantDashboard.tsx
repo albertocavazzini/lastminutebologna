@@ -66,7 +66,7 @@ const MerchantDashboard = () => {
         </div>
       </motion.div>
 
-      {/* Flash Launcher */}
+      {/* Pubblicazione offerta */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -75,7 +75,7 @@ const MerchantDashboard = () => {
       >
         <h3 className="mb-4 flex items-center gap-2 text-sm font-bold text-foreground">
           <Rocket className="h-4 w-4 text-primary" strokeWidth={1.25} />
-          Flash Launcher
+          Pubblica offerta
         </h3>
 
         <div className="space-y-3">
@@ -161,7 +161,7 @@ const MerchantDashboard = () => {
 
           {/* Preview */}
           <div className="glass rounded-lg p-3 mt-2">
-            <p className="text-xs text-muted-foreground mb-1">Drop Preview</p>
+            <p className="text-xs text-muted-foreground mb-1">Anteprima offerta</p>
             <div className="flex items-center justify-between">
               <span className="font-semibold text-foreground">
                 {formData.product}
@@ -189,12 +189,12 @@ const MerchantDashboard = () => {
             {launched ? (
               <>
                 <CheckCircle2 className="mr-2 h-4 w-4 text-success" strokeWidth={1.25} />
-                Drop Launched!
+                Offerta pubblicata!
               </>
             ) : (
               <>
                 <Plus className="w-4 h-4 mr-2" />
-                Launch Flash Drop
+                Pubblica su LastMinuteBologna
               </>
             )}
           </Button>

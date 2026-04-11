@@ -78,5 +78,5 @@ void loadPublicRuntimeConfig().then(() => {
       <App />
     </RootErrorBoundary>,
   );
-  queueMicrotask(() => postToExpo("FLASHDROP_READY"));
+  queueMicrotask(() => postToExpo("LMB_APP_READY"));
 });
