@@ -1,11 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -27,8 +20,7 @@ import {
   offertaToDrop,
 } from "@/api/miniappOfferte";
 import { projectEnv } from "@/config/projectEnv";
-
-const MapView = lazy(() => import("@/components/MapView"));
+import MapView from "@/components/MapView";
 import DropDetail from "@/components/DropDetail";
 import BottomNav from "@/components/BottomNav";
 import ProfileView from "@/components/ProfileView";
@@ -323,19 +315,11 @@ const Index = () => {
 
               {viewMode === "map" ? (
                 <div className="h-[calc(100dvh-10.5rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] min-h-[240px]">
-                  <Suspense
-                    fallback={
-                      <div className="flex h-full items-center justify-center rounded-2xl border border-border/40 bg-muted/20 text-sm text-muted-foreground">
-                        Caricamento mappa…
-                      </div>
-                    }
-                  >
-                    <MapView
-                      drops={radarDrops}
-                      onSelectDrop={setSelectedDrop}
-                      userPos={userPos}
-                    />
-                  </Suspense>
+                  <MapView
+                    drops={radarDrops}
+                    onSelectDrop={setSelectedDrop}
+                    userPos={userPos}
+                  />
                   {userPos &&
                     radarDrops.length === 0 &&
                     data?.ok &&
