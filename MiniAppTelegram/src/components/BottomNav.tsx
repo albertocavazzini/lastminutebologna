@@ -1,4 +1,4 @@
-import { Map, User, Rocket, Bell } from "lucide-react";
+import { Map, User, Ticket, Bell } from "lucide-react";
 
 interface BottomNavProps {
   active: string;
@@ -8,8 +8,8 @@ interface BottomNavProps {
 const tabs = [
   { id: "radar", icon: Map, label: "Mappa" },
   { id: "alerts", icon: Bell, label: "Alerts" },
-  { id: "merchant", icon: Rocket, label: "Locale" },
-  { id: "profile", icon: User, label: "Profile" },
+  { id: "prenotazioni", icon: Ticket, label: "Prenotazioni" },
+  { id: "profile", icon: User, label: "Profilo" },
 ];
 
 const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
@@ -29,10 +29,7 @@ const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <tab.icon
-                className="w-5 h-5"
-                strokeWidth={isActive ? 2 : 1.25}
-              />
+              <tab.icon className="w-5 h-5" strokeWidth={isActive ? 2 : 1.25} />
               <span className="text-[10px] font-medium">{tab.label}</span>
               {isActive && (
                 <div className="absolute bottom-0.5 h-1 w-6 rounded-full bg-primary/90" />

@@ -10,6 +10,11 @@ type TelegramWebApp = {
   colorScheme?: "light" | "dark";
 };
 
+/** Stringa firmata da Telegram (`query_id=…&user=…&hash=…`). Vuota fuori da Telegram. */
+export function getTelegramInitData(): string {
+  return window.Telegram?.WebApp?.initData?.trim() ?? "";
+}
+
 declare global {
   interface Window {
     Telegram?: { WebApp: TelegramWebApp };

@@ -56,7 +56,8 @@ Priorità in app: variabili `VITE_*` della build → poi `runtime-config.json`.
 
 Per l’elenco e la mappa con offerte **attive adesso** e **nel raggio radar**, sul progetto Google Apps Script servono:
 
-- il file `WEBAPP/api/api_miniapp.js` (endpoint JSONP `mode=api_miniapp&action=offerte`);
+- i file `WEBAPP/api/api_miniapp.js` (JSONP `offerte`, `prenotazioni_mie`) e `WEBAPP/api/telegram_webapp_initdata.js` (verifica `initData`);
+- in `FIREBASE/runtime_prenotazioni.js` la funzione `listaPrenotazioniPerChatIdDaFirebase_`;
 - l’aggancio in `WEBAPP/router/doget.js` (già presente in questo repo).
 
 Dopo il deploy, la mini app usa `VITE_APPS_SCRIPT_WEBAPP_BASE` come `MiniAppTelegram/app.js`.
