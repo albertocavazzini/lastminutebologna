@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "checkJs": false,
+    "noEmit": true,
+    "module": "none",
+    "target": "ES2020",
+    "types": ["google-apps-script"]
+  },
+  "include": ["**/*.js", "types/**/*.d.ts"]
+}

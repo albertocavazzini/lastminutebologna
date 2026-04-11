@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+*.log
+
+MiniAppTelegram/dist/
+MiniAppTelegram/.env
+MiniAppTelegram/.env.local
+MiniAppTelegram/.env.*.local

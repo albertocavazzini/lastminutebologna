@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Risolve asset (JS/CSS) su GitHub Pages / WebView Telegram anche senza slash finale nell’URL -->
+    <base href="%BASE_URL%" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>LastMinute Bologna</title>
+    <meta name="description" content="Offerte last minute a Bologna" />
+    <meta name="author" content="LastMinute Bologna" />
+
+    <meta property="og:title" content="LastMinute Bologna" />
+    <meta property="og:description" content="Offerte last minute a Bologna" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@Lovable" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

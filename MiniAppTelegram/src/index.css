@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Cloud White — sezioni, mappa */
+    --background: 0 0% 97%;
+    /* Ink Grey — testi, mai nero puro */
+    --foreground: 0 0% 28%;
+
+    /* Pure White — card che galleggiano */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 28%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 28%;
+
+    /* Flash Orange → mandarino #FF7E5F */
+    --primary: 11 100% 69%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 94%;
+    --secondary-foreground: 0 0% 28%;
+
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
+
+    /* Soft Sand — GoldenDrop #D4B483 */
+    --accent: 38 48% 67%;
+    --accent-foreground: 0 0% 22%;
+
+    /* Teal — successo / posti disponibili #00A699 */
+    --success: 174 100% 33%;
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 11 100% 69%;
+
+    /* 16px base — card usano rounded-2xl (~24px) */
+    --radius: 1rem;
+
+    --neon-green: 174 100% 33%;
+    --neon-green-glow: 11 100% 69%;
+    --gold: 38 48% 67%;
+    --gold-glow: 38 48% 67%;
+    --urgent-red: 0 72% 51%;
+    --urgent-red-glow: 0 72% 51%;
+    --surface-glass: 0 0% 100%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 28%;
+    --sidebar-primary: 11 100% 69%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent-foreground: 0 0% 28%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 11 100% 69%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Ombre morbide stile editoriale, non neon */
+  .glow-green {
+    box-shadow: 0 4px 14px hsl(11 100% 69% / 0.22);
+  }
+
+  .glow-gold {
+    box-shadow: 0 4px 14px hsl(38 48% 67% / 0.28);
+  }
+
+  .glow-red {
+    box-shadow: 0 4px 14px hsl(0 72% 51% / 0.2);
+  }
+
+  .text-glow-green {
+    text-shadow: 0 1px 2px hsl(0 0% 28% / 0.06);
+  }
+
+  .text-glow-gold {
+    text-shadow: 0 1px 2px hsl(38 48% 40% / 0.12);
+  }
+
+  .glass {
+    @apply bg-card/90 backdrop-blur-md border border-border/50 shadow-sm;
+  }
+
+  .glass-strong {
+    @apply bg-card/95 backdrop-blur-xl border border-border/60 shadow-card;
+  }
+}
+
+@keyframes pulse-urgent {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+@keyframes radar-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes ping-drop {
+  0% { transform: scale(1); opacity: 1; }
+  75% { transform: scale(2); opacity: 0; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+.animate-pulse-urgent {
+  animation: pulse-urgent 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-radar {
+  animation: radar-sweep 3s linear infinite;
+}
+
+.animate-ping-drop {
+  animation: ping-drop 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
