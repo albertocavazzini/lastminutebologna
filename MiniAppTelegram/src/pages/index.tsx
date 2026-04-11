@@ -128,17 +128,25 @@ const Index = () => {
               exit={{ opacity: 0 }}
             >
               {!webAppBase && (
-                <p className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-100">
-                  <strong className="text-foreground">Nessun URL web app in build.</strong>{" "}
-                  In locale: metti{" "}
-                  <span className="font-mono">VITE_APPS_SCRIPT_WEBAPP_BASE</span> in{" "}
-                  <span className="font-mono">MiniAppTelegram/.env</span> (URL{" "}
-                  <span className="font-mono">…/exec</span>). Su{" "}
-                  <strong className="text-foreground">GitHub Pages</strong>: aggiungi lo
-                  stesso valore come secret{" "}
-                  <span className="font-mono">VITE_APPS_SCRIPT_WEBAPP_BASE</span> in
-                  Repository → Settings → Secrets and variables → Actions, poi rilancia
-                  il workflow Deploy.
+                <p className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-relaxed text-amber-900 dark:text-amber-100">
+                  <strong className="text-foreground">
+                    Manca l&apos;URL della web app Apps Script
+                  </strong>
+                  . Scegli <strong className="text-foreground">un</strong> modo:
+                  <br />
+                  <span className="font-mono text-[11px]">1)</span> file{" "}
+                  <span className="font-mono">MiniAppTelegram/public/runtime-config.json</span>{" "}
+                  → campo <span className="font-mono">appsScriptWebAppBase</span> con
+                  l&apos;URL <span className="font-mono">https://script.google.com/macros/s/…/exec</span>
+                  , poi commit e push (va bene in repo: è l&apos;endpoint pubblico).
+                  <br />
+                  <span className="font-mono text-[11px]">2)</span> in locale:{" "}
+                  <span className="font-mono">MiniAppTelegram/.env</span> con{" "}
+                  <span className="font-mono">VITE_APPS_SCRIPT_WEBAPP_BASE=…/exec</span>
+                  <br />
+                  <span className="font-mono text-[11px]">3)</span> su GitHub: secret{" "}
+                  <span className="font-mono">VITE_APPS_SCRIPT_WEBAPP_BASE</span> (Actions)
+                  e nuovo deploy.
                 </p>
               )}
 

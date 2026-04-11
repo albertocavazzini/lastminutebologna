@@ -35,12 +35,18 @@ Variabili: vedi `MiniAppTelegram/.env.example`.
 
 ### Build su GitHub (Pages)
 
-Il workflow compila con le variabili **`VITE_*`**. Se non configuri il secret, in produzione **non** viene chiamata Apps Script e il radar resta vuoto.
+L’URL della web app deve finire nella build, altrimenti vedi l’avviso giallo in app. Puoi usare **una** di queste strade:
 
-1. **Repository** → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
-2. Nome: `VITE_APPS_SCRIPT_WEBAPP_BASE` — valore: URL completo della web app (`https://script.google.com/macros/s/…/exec`)
-3. Opzionale: `VITE_PUBLIC_MINI_APP_URL` = URL della mini app su Pages (stesso di `URL_MINI_APP_TELEGRAM` se serve in build)
-4. **Actions** → **Deploy GitHub Pages** → **Run workflow** (o push su `main`)
+**A — File in repo (più semplice)**  
+Modifica `MiniAppTelegram/public/runtime-config.json`: in `appsScriptWebAppBase` metti l’URL `https://script.google.com/macros/s/…/exec`, commit e push. L’app lo legge a runtime (è l’endpoint pubblico della web app).
+
+**B — Secret GitHub (senza committare l’URL)**  
+1. **Settings** → **Secrets and variables** → **Actions** → **New repository secret**  
+2. Nome: `VITE_APPS_SCRIPT_WEBAPP_BASE` — valore: stesso URL `…/exec`  
+3. Opzionale: `VITE_PUBLIC_MINI_APP_URL`  
+4. **Actions** → **Deploy GitHub Pages** → esegui di nuovo il workflow
+
+Priorità in app: variabili `VITE_*` della build → poi `runtime-config.json`.
 
 ## Apps Script (mini app ↔ radar)
 

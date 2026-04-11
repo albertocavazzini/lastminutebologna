@@ -2,9 +2,8 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { loadPublicRuntimeConfig } from "@/config/loadRuntimeConfig";
 import { initTelegramWebApp } from "@/lib/telegramWebApp";
-
-initTelegramWebApp();
 
 declare global {
   interface Window {
@@ -71,11 +70,13 @@ if (!el) {
   throw new Error("Missing #root");
 }
 
-const root = createRoot(el);
-root.render(
-  <RootErrorBoundary>
-    <App />
-  </RootErrorBoundary>,
-);
-
-queueMicrotask(() => postToExpo("FLASHDROP_READY"));
+void loadPublicRuntimeConfig().then(() => {
+  initTelegramWebApp();
+  const root = createRoot(el);
+  root.render(
+    <RootErrorBoundary>
+      <App />
+    </RootErrorBoundary>,
+  );
+  queueMicrotask(() => postToExpo("FLASHDROP_READY"));
+});
