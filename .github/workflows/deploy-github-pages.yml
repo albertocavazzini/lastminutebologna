@@ -32,6 +32,9 @@ jobs:
         working-directory: MiniAppTelegram
         env:
           VITE_SKIP_LOVABLE_TAGGER: "1"
+          # Repository → Settings → Secrets and variables → Actions
+          VITE_APPS_SCRIPT_WEBAPP_BASE: ${{ secrets.VITE_APPS_SCRIPT_WEBAPP_BASE }}
+          VITE_PUBLIC_MINI_APP_URL: ${{ secrets.VITE_PUBLIC_MINI_APP_URL }}
         run: |
           npm ci
           npm run build

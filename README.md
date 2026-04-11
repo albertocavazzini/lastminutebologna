@@ -31,7 +31,16 @@ npm ci
 npm run dev
 ```
 
-Variabili opzionali: vedi `MiniAppTelegram/.env.example`.
+Variabili: vedi `MiniAppTelegram/.env.example`.
+
+### Build su GitHub (Pages)
+
+Il workflow compila con le variabili **`VITE_*`**. Se non configuri il secret, in produzione **non** viene chiamata Apps Script e il radar resta vuoto.
+
+1. **Repository** → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+2. Nome: `VITE_APPS_SCRIPT_WEBAPP_BASE` — valore: URL completo della web app (`https://script.google.com/macros/s/…/exec`)
+3. Opzionale: `VITE_PUBLIC_MINI_APP_URL` = URL della mini app su Pages (stesso di `URL_MINI_APP_TELEGRAM` se serve in build)
+4. **Actions** → **Deploy GitHub Pages** → **Run workflow** (o push su `main`)
 
 ## Apps Script (mini app ↔ radar)
 

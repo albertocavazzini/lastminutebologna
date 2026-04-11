@@ -129,11 +129,16 @@ const Index = () => {
             >
               {!webAppBase && (
                 <p className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-100">
-                  Configura{" "}
-                  <span className="font-mono">VITE_APPS_SCRIPT_WEBAPP_BASE</span>{" "}
-                  nel file <span className="font-mono">.env</span> con l&apos;URL{" "}
-                  <span className="font-mono">…/exec</span> della web app per
-                  caricare le offerte attive.
+                  <strong className="text-foreground">Nessun URL web app in build.</strong>{" "}
+                  In locale: metti{" "}
+                  <span className="font-mono">VITE_APPS_SCRIPT_WEBAPP_BASE</span> in{" "}
+                  <span className="font-mono">MiniAppTelegram/.env</span> (URL{" "}
+                  <span className="font-mono">…/exec</span>). Su{" "}
+                  <strong className="text-foreground">GitHub Pages</strong>: aggiungi lo
+                  stesso valore come secret{" "}
+                  <span className="font-mono">VITE_APPS_SCRIPT_WEBAPP_BASE</span> in
+                  Repository → Settings → Secrets and variables → Actions, poi rilancia
+                  il workflow Deploy.
                 </p>
               )}
 
