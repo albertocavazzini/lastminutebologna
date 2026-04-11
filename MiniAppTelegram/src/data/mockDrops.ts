@@ -16,6 +16,9 @@ export interface Drop {
   lng: number;
   image: string;
   description: string;
+  /** Da Apps Script (t.me/...?start=id) */
+  linkPrenota?: string;
+  urlMaps?: string;
 }
 
 export const mockDrops: Drop[] = [

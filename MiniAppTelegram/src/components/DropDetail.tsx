@@ -47,6 +47,24 @@ const DropDetail = ({ drop, onClose }: DropDetailProps) => {
 
   if (!drop) return null;
 
+  const openTelegramPrenota = () => {
+    const url = drop.linkPrenota;
+    if (!url) return;
+    const tw = window.Telegram?.WebApp;
+    if (tw && typeof tw.openTelegramLink === "function") {
+      tw.openTelegramLink(url);
+    } else {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+    onClose();
+  };
+
+  const openMapsUrl = () => {
+    if (drop.urlMaps) {
+      window.open(drop.urlMaps, "_blank", "noopener,noreferrer");
+    }
+  };
+
   const isUrgent = remaining < 300;
 
   return (
@@ -131,7 +149,9 @@ const DropDetail = ({ drop, onClose }: DropDetailProps) => {
                 <div className="rounded-2xl border border-border/60 bg-secondary/40 p-3 text-center">
                   <MapPin className="w-4 h-4 mx-auto mb-1 text-muted-foreground" strokeWidth={1.25} />
                   <p className="text-sm font-semibold text-foreground">
-                    {drop.distance}m
+                    {drop.distance >= 1000
+                      ? `${(drop.distance / 1000).toFixed(1)} km`
+                      : `${Math.round(drop.distance)} m`}
                   </p>
                   <p className="text-xs text-muted-foreground">away</p>
                 </div>
@@ -168,14 +188,18 @@ const DropDetail = ({ drop, onClose }: DropDetailProps) => {
               {/* Actions */}
               <div className="flex gap-3">
                 <Button
+                  type="button"
                   variant="outline"
                   className="flex-1 rounded-xl border-border text-foreground hover:bg-secondary"
+                  disabled={!drop.urlMaps}
+                  onClick={openMapsUrl}
                 >
                   <Navigation className="w-4 h-4 mr-2" strokeWidth={1.25} />
-                  Navigate
+                  Mappa
                 </Button>
                 <Button
-                  onClick={handleBookAndPay}
+                  type="button"
+                  onClick={drop.linkPrenota ? openTelegramPrenota : handleBookAndPay}
                   className={`flex-1 rounded-xl font-bold ${
                     drop.isGolden
                       ? "bg-accent text-accent-foreground hover:bg-accent/90 glow-gold"
@@ -183,7 +207,7 @@ const DropDetail = ({ drop, onClose }: DropDetailProps) => {
                   }`}
                 >
                   <QrCode className="w-4 h-4 mr-2" strokeWidth={1.25} />
-                  Book & Pay
+                  {drop.linkPrenota ? "Prenota nel bot" : "Book & Pay"}
                 </Button>
               </div>
               </div>

@@ -32,3 +32,12 @@ npm run dev
 ```
 
 Variabili opzionali: vedi `MiniAppTelegram/.env.example`.
+
+## Apps Script (mini app ↔ radar)
+
+Per l’elenco e la mappa con offerte **attive adesso** e **nel raggio radar**, sul progetto Google Apps Script servono:
+
+- il file `WEBAPP/api/api_miniapp.js` (endpoint JSONP `mode=api_miniapp&action=offerte`);
+- l’aggancio in `WEBAPP/router/doget.js` (già presente in questo repo).
+
+Dopo il deploy, la mini app usa `VITE_APPS_SCRIPT_WEBAPP_BASE` come `MiniAppTelegram/app.js`.
