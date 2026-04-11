@@ -25,7 +25,33 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Sostituito da React; se resta visibile, JS non è partito (URL/base errati o Pages non su Actions). -->
+      <div
+        id="boot-shell"
+        style="
+          box-sizing: border-box;
+          min-height: 100dvh;
+          margin: 0;
+          padding: max(1.25rem, env(safe-area-inset-top, 0px)) 1.25rem 1.25rem;
+          font-family: system-ui, sans-serif;
+          background: hsl(0 0% 97%);
+          color: hsl(0 0% 28%);
+        "
+      >
+        <p style="margin: 0 0 0.5rem; font-size: 1.125rem; font-weight: 700">
+          Last Minute <span style="color: hsl(11 100% 69%)">Bologna</span>
+        </p>
+        <p style="margin: 0; font-size: 0.875rem; opacity: 0.75">
+          Caricamento…
+        </p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
+    <noscript>
+      <p style="font-family: system-ui; padding: 1rem">
+        Attiva JavaScript per usare la mini app.
+      </p>
+    </noscript>
   </body>
 </html>

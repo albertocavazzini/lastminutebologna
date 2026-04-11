@@ -7,6 +7,7 @@ type TelegramWebApp = {
   ready: () => void;
   expand: () => void;
   initData: string;
+  colorScheme?: "light" | "dark";
 };
 
 declare global {
@@ -20,6 +21,9 @@ export function initTelegramWebApp(): void {
   if (!tw) return;
   tw.ready();
   tw.expand();
+  if (tw.colorScheme === "dark") {
+    document.documentElement.classList.add("dark");
+  }
 }
 
 export function isTelegramMiniApp(): boolean {
