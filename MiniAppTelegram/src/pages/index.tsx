@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -20,6 +26,10 @@ import {
   offertaToDrop,
 } from "@/api/miniappOfferte";
 import { projectEnv } from "@/config/projectEnv";
+import {
+  userMapPositionFromGeolocation,
+  type UserMapPosition,
+} from "@/lib/geo/userMapPosition";
 import MapView from "@/components/MapView";
 import DropDetail from "@/components/DropDetail";
 import BottomNav from "@/components/BottomNav";
@@ -35,9 +45,7 @@ const Index = () => {
   const [prenotazioniSubView, setPrenotazioniSubView] =
     useState<PrenotazioniSubView>("lista");
   const [selectedDrop, setSelectedDrop] = useState<Drop | null>(null);
-  const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(
-    null,
-  );
+  const [userPos, setUserPos] = useState<UserMapPosition | null>(null);
   const [geoDone, setGeoDone] = useState(false);
   const [geoDenied, setGeoDenied] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
@@ -54,10 +62,7 @@ const Index = () => {
     setGeoDone(false);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setUserPos({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        });
+        setUserPos(userMapPositionFromGeolocation(pos));
         setGeoDone(true);
         setGeoDenied(false);
         setGeoLoading(false);
@@ -67,13 +72,46 @@ const Index = () => {
         setGeoDenied(err.code === err.PERMISSION_DENIED);
         setGeoLoading(false);
       },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 20_000 },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 25_000,
+      },
+    );
+  }, []);
+
+  /** Aggiorna solo coordinate (senza resettare geoDone / loading): utile aprendo la mappa. */
+  const refineLocation = useCallback(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserPos(userMapPositionFromGeolocation(pos));
+      },
+      () => {},
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 25_000,
+      },
     );
   }, []);
 
   useEffect(() => {
     requestLocation();
   }, [requestLocation]);
+
+  /** Nuovo fix GPS passando a vista mappa (spesso più preciso del primo avvio). */
+  const prevViewMode = useRef(viewMode);
+  useEffect(() => {
+    if (
+      activeTab === "radar" &&
+      viewMode === "map" &&
+      prevViewMode.current !== "map"
+    ) {
+      refineLocation();
+    }
+    prevViewMode.current = viewMode;
+  }, [activeTab, viewMode, refineLocation]);
 
   const { data, isPending, isError, error, refetch, isFetching } = useQuery({
     queryKey: ["miniapp-offerte", webAppBase],
