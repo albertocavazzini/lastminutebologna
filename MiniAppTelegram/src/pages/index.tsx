@@ -8,7 +8,15 @@ import {
 } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Map, List, RefreshCw, MapPin } from "lucide-react";
+import {
+  Zap,
+  Map,
+  List,
+  RefreshCw,
+  MapPin,
+  MessageSquare,
+  Ticket,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Drop } from "@/data/mockDrops";
 import DropCard from "@/components/DropCard";
@@ -24,12 +32,16 @@ const MapView = lazy(() => import("@/components/MapView"));
 import DropDetail from "@/components/DropDetail";
 import BottomNav from "@/components/BottomNav";
 import ProfileView from "@/components/ProfileView";
-import PrenotazioniView from "@/components/PrenotazioniView";
+import PrenotazioniView, {
+  type PrenotazioniSubView,
+} from "@/components/PrenotazioniView";
 import AlertsView from "@/components/AlertsView";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("radar");
   const [viewMode, setViewMode] = useState<"map" | "list">("list");
+  const [prenotazioniSubView, setPrenotazioniSubView] =
+    useState<PrenotazioniSubView>("lista");
   const [selectedDrop, setSelectedDrop] = useState<Drop | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(
     null,
@@ -124,6 +136,7 @@ const Index = () => {
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground"
                 }`}
+                aria-label="Elenco offerte"
               >
                 <List className="h-4 w-4" strokeWidth={1.25} />
               </button>
@@ -135,8 +148,38 @@ const Index = () => {
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground"
                 }`}
+                aria-label="Mappa"
               >
                 <Map className="h-4 w-4" strokeWidth={1.25} />
+              </button>
+            </div>
+          )}
+
+          {activeTab === "prenotazioni" && (
+            <div className="flex items-center gap-1 rounded-lg bg-secondary/50 p-0.5">
+              <button
+                type="button"
+                onClick={() => setPrenotazioniSubView("lista")}
+                className={`rounded-md p-1.5 transition-colors ${
+                  prenotazioniSubView === "lista"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground"
+                }`}
+                aria-label="Prenotazioni e QR"
+              >
+                <Ticket className="h-4 w-4" strokeWidth={1.25} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrenotazioniSubView("feedback")}
+                className={`rounded-md p-1.5 transition-colors ${
+                  prenotazioniSubView === "feedback"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground"
+                }`}
+                aria-label="Feedback"
+              >
+                <MessageSquare className="h-4 w-4" strokeWidth={1.25} />
               </button>
             </div>
           )}
@@ -346,7 +389,7 @@ const Index = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <PrenotazioniView />
+              <PrenotazioniView subView={prenotazioniSubView} />
             </motion.div>
           )}
 

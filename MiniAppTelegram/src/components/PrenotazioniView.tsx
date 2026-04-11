@@ -4,6 +4,7 @@ import { fetchMiniappPrenotazioniJsonp } from "@/api/miniappPrenotazioni";
 import { projectEnv } from "@/config/projectEnv";
 import { getTelegramInitData } from "@/lib/telegramWebApp";
 import { Button } from "@/components/ui/button";
+import PrenotazioniFeedbackPanel from "@/components/PrenotazioniFeedbackPanel";
 
 function formatData(iso: string): string {
   if (!iso) return "—";
@@ -18,7 +19,13 @@ function formatData(iso: string): string {
   });
 }
 
-const PrenotazioniView = () => {
+export type PrenotazioniSubView = "lista" | "feedback";
+
+type PrenotazioniViewProps = {
+  subView: PrenotazioniSubView;
+};
+
+const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
   const webAppBase = projectEnv.appsScriptWebAppBase?.trim() ?? "";
   const initData = getTelegramInitData();
 
@@ -52,6 +59,12 @@ const PrenotazioniView = () => {
           il tuo account e può mostrare le prenotazioni e il QR.
         </p>
       </div>
+    );
+  }
+
+  if (subView === "feedback") {
+    return (
+      <PrenotazioniFeedbackPanel webAppBase={webAppBase} initData={initData} />
     );
   }
 
