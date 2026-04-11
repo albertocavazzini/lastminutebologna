@@ -27,10 +27,19 @@ import {
 } from "@/api/miniappOfferte";
 import { projectEnv } from "@/config/projectEnv";
 import {
+  clearGeoCache,
+  getGeoCacheSavedAt,
+  readGeoCache,
+  writeGeoCache,
+} from "@/lib/geo/geoCache";
+import {
   userMapPositionFromGeolocation,
   type UserMapPosition,
 } from "@/lib/geo/userMapPosition";
 import MapView from "@/components/MapView";
+
+/** Se la cache è più recente, non richiamiamo il GPS aprendo la mappa (meno prompt nel WebView). */
+const REFINE_MAP_MIN_INTERVAL_MS = 30 * 60 * 1000;
 import DropDetail from "@/components/DropDetail";
 import BottomNav from "@/components/BottomNav";
 import ProfileView from "@/components/ProfileView";
@@ -45,8 +54,12 @@ const Index = () => {
   const [prenotazioniSubView, setPrenotazioniSubView] =
     useState<PrenotazioniSubView>("lista");
   const [selectedDrop, setSelectedDrop] = useState<Drop | null>(null);
-  const [userPos, setUserPos] = useState<UserMapPosition | null>(null);
-  const [geoDone, setGeoDone] = useState(false);
+  const [userPos, setUserPos] = useState<UserMapPosition | null>(() =>
+    typeof window !== "undefined" ? readGeoCache() : null,
+  );
+  const [geoDone, setGeoDone] = useState(
+    () => typeof window !== "undefined" && readGeoCache() !== null,
+  );
   const [geoDenied, setGeoDenied] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
 
@@ -62,14 +75,22 @@ const Index = () => {
     setGeoDone(false);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setUserPos(userMapPositionFromGeolocation(pos));
+        const u = userMapPositionFromGeolocation(pos);
+        setUserPos(u);
+        writeGeoCache(u);
         setGeoDone(true);
         setGeoDenied(false);
         setGeoLoading(false);
       },
       (err) => {
         setGeoDone(true);
-        setGeoDenied(err.code === err.PERMISSION_DENIED);
+        if (err.code === err.PERMISSION_DENIED) {
+          setGeoDenied(true);
+          clearGeoCache();
+          setUserPos(null);
+        } else {
+          setGeoDenied(false);
+        }
         setGeoLoading(false);
       },
       {
@@ -85,7 +106,9 @@ const Index = () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setUserPos(userMapPositionFromGeolocation(pos));
+        const u = userMapPositionFromGeolocation(pos);
+        setUserPos(u);
+        writeGeoCache(u);
       },
       () => {},
       {
@@ -97,10 +120,13 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
+    if (readGeoCache()) {
+      return;
+    }
     requestLocation();
   }, [requestLocation]);
 
-  /** Nuovo fix GPS passando a vista mappa (spesso più preciso del primo avvio). */
+  /** Nuovo fix GPS passando a vista mappa solo se la cache non è fresca (evita prompt ripetuti). */
   const prevViewMode = useRef(viewMode);
   useEffect(() => {
     if (
@@ -108,7 +134,13 @@ const Index = () => {
       viewMode === "map" &&
       prevViewMode.current !== "map"
     ) {
-      refineLocation();
+      const savedAt = getGeoCacheSavedAt();
+      if (
+        savedAt == null ||
+        Date.now() - savedAt >= REFINE_MAP_MIN_INTERVAL_MS
+      ) {
+        refineLocation();
+      }
     }
     prevViewMode.current = viewMode;
   }, [activeTab, viewMode, refineLocation]);
