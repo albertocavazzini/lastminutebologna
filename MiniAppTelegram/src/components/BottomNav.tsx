@@ -14,7 +14,7 @@ const tabs = [
 
 const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 glass-strong border-t border-border/30 pb-[calc(env(safe-area-inset-bottom,0px)+1.25rem)]">
+    <nav className="lmb-nav-safe-pb fixed bottom-0 left-0 right-0 z-40 glass-strong border-t border-border/30">
       <div className="mx-auto flex min-h-20 max-w-md items-center justify-around px-1 pt-1">
         {tabs.map((tab) => {
           const isActive = active === tab.id;
