@@ -10,11 +10,22 @@ import {
   Navigation,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Drop } from "@/data/mockDrops";
 
 interface DropDetailProps {
   drop: Drop | null;
   onClose: () => void;
+  /** Id offerta (`drop.id`) per cui l'utente ha già una prenotazione (da `prenotazioni_mie`). */
+  idsOfferteConPrenotazione?: ReadonlySet<string>;
 }
 
 const formatTime = (seconds: number) => {
@@ -23,14 +34,20 @@ const formatTime = (seconds: number) => {
   return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 };
 
-const DropDetail = ({ drop, onClose }: DropDetailProps) => {
+const DropDetail = ({
+  drop,
+  onClose,
+  idsOfferteConPrenotazione = new Set(),
+}: DropDetailProps) => {
   const [remaining, setRemaining] = useState(0);
   const [step, setStep] = useState<"detail" | "qr" | "confirmed">("detail");
+  const [limitePrenotaOpen, setLimitePrenotaOpen] = useState(false);
 
   useEffect(() => {
     if (drop) {
       setRemaining(drop.remainingSeconds);
       setStep("detail");
+      setLimitePrenotaOpen(false);
     }
   }, [drop]);
 
@@ -57,6 +74,18 @@ const DropDetail = ({ drop, onClose }: DropDetailProps) => {
       window.open(url, "_blank", "noopener,noreferrer");
     }
     onClose();
+  };
+
+  const onPrenotaClick = () => {
+    if (!drop.linkPrenota) {
+      handleBookAndPay();
+      return;
+    }
+    if (idsOfferteConPrenotazione.has(drop.id)) {
+      setLimitePrenotaOpen(true);
+      return;
+    }
+    openTelegramPrenota();
   };
 
   const openMapsUrl = () => {
@@ -199,7 +228,7 @@ const DropDetail = ({ drop, onClose }: DropDetailProps) => {
                 </Button>
                 <Button
                   type="button"
-                  onClick={drop.linkPrenota ? openTelegramPrenota : handleBookAndPay}
+                  onClick={onPrenotaClick}
                   className={`flex-1 rounded-xl font-bold ${
                     drop.isGolden
                       ? "bg-accent text-accent-foreground hover:bg-accent/90 glow-gold"
@@ -294,6 +323,28 @@ const DropDetail = ({ drop, onClose }: DropDetailProps) => {
           )}
         </motion.div>
       </motion.div>
+
+      <AlertDialog open={limitePrenotaOpen} onOpenChange={setLimitePrenotaOpen}>
+        <AlertDialogContent className="max-w-[min(100vw-2rem,24rem)] rounded-2xl border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Prenotazione già presente</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hai già una prenotazione per questa offerta. Puoi ordinarne al
+              massimo una alla volta. Controlla la sezione Prenotazioni per il
+              tuo QR.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              type="button"
+              className="rounded-xl"
+              onClick={() => setLimitePrenotaOpen(false)}
+            >
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AnimatePresence>
   );
 };

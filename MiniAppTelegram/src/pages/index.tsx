@@ -18,7 +18,9 @@ import {
   filterOffersRadarStyle,
   offertaToDrop,
 } from "@/api/miniappOfferte";
+import { fetchMiniappPrenotazioniJsonp } from "@/api/miniappPrenotazioni";
 import { projectEnv } from "@/config/projectEnv";
+import { getTelegramInitData } from "@/lib/telegramWebApp";
 import {
   clearGeoCache,
   getGeoCacheSavedAt,
@@ -36,6 +38,7 @@ const REFINE_MAP_MIN_INTERVAL_MS = 30 * 60 * 1000;
 
 /** Polling offerte sul tab radar (mappa/elenco); fermo su altre tab per risparmiare quota Apps Script. */
 const RADAR_OFFERTE_REFETCH_MS = 60_000;
+
 import DropDetail from "@/components/DropDetail";
 import BottomNav from "@/components/BottomNav";
 import ProfileView from "@/components/ProfileView";
@@ -60,6 +63,7 @@ const Index = () => {
   const [geoLoading, setGeoLoading] = useState(false);
 
   const webAppBase = projectEnv.appsScriptWebAppBase?.trim() ?? "";
+  const initData = getTelegramInitData();
 
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -148,6 +152,23 @@ const Index = () => {
     enabled: Boolean(webAppBase),
     refetchInterval: activeTab === "radar" ? RADAR_OFFERTE_REFETCH_MS : false,
   });
+
+  const { data: prenotazioniData } = useQuery({
+    queryKey: ["miniapp-prenotazioni", webAppBase, initData.slice(0, 80)],
+    queryFn: () => fetchMiniappPrenotazioniJsonp(webAppBase, initData),
+    enabled: Boolean(webAppBase && initData),
+    staleTime: 20_000,
+  });
+
+  const idsOfferteConPrenotazione = useMemo(() => {
+    const s = new Set<string>();
+    if (!prenotazioniData?.ok || !prenotazioniData.prenotazioni) return s;
+    for (const p of prenotazioniData.prenotazioni) {
+      const id = String(p.id_offerta || "").trim();
+      if (id) s.add(id);
+    }
+    return s;
+  }, [prenotazioniData]);
 
   const radarDrops = useMemo(() => {
     if (!data?.ok || !data.offerte?.length || !userPos) return [];
@@ -436,7 +457,11 @@ const Index = () => {
         </AnimatePresence>
       </main>
 
-      <DropDetail drop={selectedDrop} onClose={() => setSelectedDrop(null)} />
+      <DropDetail
+        drop={selectedDrop}
+        onClose={() => setSelectedDrop(null)}
+        idsOfferteConPrenotazione={idsOfferteConPrenotazione}
+      />
 
       <BottomNav active={activeTab} onNavigate={setActiveTab} />
     </div>
