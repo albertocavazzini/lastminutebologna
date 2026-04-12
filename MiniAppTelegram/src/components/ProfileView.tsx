@@ -1,5 +1,11 @@
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ExternalLink, MessageCircle, User } from "lucide-react";
+import {
+  fetchMiniappOfferteJsonp,
+  parseTelegramBotUsernameFromTMeLink,
+} from "@/api/miniappOfferte";
 import { Button } from "@/components/ui/button";
 import { projectEnv } from "@/config/projectEnv";
 import {
@@ -23,10 +29,29 @@ const FAQ_SUPPORT = [
 ] as const;
 
 const ProfileView = () => {
+  const webAppBase = projectEnv.appsScriptWebAppBase?.trim() ?? "";
+  const { data: offerteData } = useQuery({
+    queryKey: ["miniapp-offerte", webAppBase],
+    queryFn: () => fetchMiniappOfferteJsonp(webAppBase),
+    enabled: Boolean(webAppBase),
+    staleTime: 60_000,
+  });
+
   const tgUser = getTelegramWebAppUser();
   const displayName = tgUser ? formatTelegramDisplayName(tgUser) : null;
   const username = tgUser?.username?.replace(/^@/, "").trim();
-  const botUser = projectEnv.telegramBotUsername;
+
+  const botUser = useMemo(() => {
+    const configured = projectEnv.telegramBotUsername;
+    if (configured) return configured;
+    const list = offerteData?.ok ? (offerteData.offerte ?? []) : [];
+    for (const o of list) {
+      const u = parseTelegramBotUsernameFromTMeLink(o.link_prenota);
+      if (u) return u;
+    }
+    return "";
+  }, [offerteData]);
+
   const botUrl = botUser ? `https://t.me/${botUser}` : "";
 
   const openBotChat = () => {
@@ -94,11 +119,12 @@ const ProfileView = () => {
         </Button>
         {!botUrl ? (
           <p className="text-xs text-amber-800 dark:text-amber-200">
-            Configura il nome utente del bot senza @ in{" "}
-            <span className="font-mono">VITE_TELEGRAM_BOT_USERNAME</span> o in{" "}
-            <span className="font-mono">runtime-config.json</span> (
-            <span className="font-mono">telegramBotUsername</span>) per
-            abilitare il pulsante.
+            Non risulta il link al bot: configura{" "}
+            <span className="font-mono">VITE_TELEGRAM_BOT_USERNAME</span> o{" "}
+            <span className="font-mono">telegramBotUsername</span> in{" "}
+            <span className="font-mono">runtime-config.json</span>, oppure
+            assicurati che le offerte da API includano{" "}
+            <span className="font-mono">link_prenota</span> (t.me/…).
           </p>
         ) : null}
       </motion.div>

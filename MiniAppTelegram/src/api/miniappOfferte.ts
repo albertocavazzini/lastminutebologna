@@ -30,6 +30,27 @@ export type MiniappOfferteResponse = {
 
 export const MINIAPP_OFFERTE_QUERY_ROOT = "miniapp-offerte" as const;
 
+/**
+ * Username bot (senza @) da URL tipo `https://t.me/NomeBot?start=…` come in `link_prenota`.
+ */
+export function parseTelegramBotUsernameFromTMeLink(
+  link: string | undefined | null,
+): string {
+  const s = String(link ?? "").trim();
+  if (!s) return "";
+  try {
+    const u = new URL(s);
+    const h = u.hostname.toLowerCase();
+    if (h !== "t.me" && h !== "telegram.me" && h !== "telegram.dog") {
+      return "";
+    }
+    const first = u.pathname.replace(/^\//, "").split("/")[0]?.trim() ?? "";
+    return first.replace(/^@/, "");
+  } catch {
+    return "";
+  }
+}
+
 function secondsUntilScadenzaLocale(scadenzaHHmm: string): number {
   const m = /^(\d{1,2}):(\d{2})$/.exec(String(scadenzaHHmm || "").trim());
   if (!m) return 3600;
