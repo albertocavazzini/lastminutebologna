@@ -5,7 +5,6 @@ import {
   Zap,
   Map,
   List,
-  RefreshCw,
   MapPin,
   MessageSquare,
   Ticket,
@@ -59,7 +58,6 @@ const Index = () => {
   );
   const [geoDenied, setGeoDenied] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
-  const [manualOffersRefresh, setManualOffersRefresh] = useState(false);
 
   const webAppBase = projectEnv.appsScriptWebAppBase?.trim() ?? "";
 
@@ -143,18 +141,13 @@ const Index = () => {
     prevViewMode.current = viewMode;
   }, [activeTab, viewMode, refineLocation]);
 
-  const { data, isPending, isError, error, refetch } = useQuery({
+  const { data, isPending, isError, error } = useQuery({
     queryKey: ["miniapp-offerte", webAppBase],
     queryFn: () => fetchMiniappOfferteJsonp(webAppBase),
     staleTime: 60_000,
     enabled: Boolean(webAppBase),
     refetchInterval: activeTab === "radar" ? RADAR_OFFERTE_REFETCH_MS : false,
   });
-
-  const refreshOffersManual = useCallback(() => {
-    setManualOffersRefresh(true);
-    void refetch().finally(() => setManualOffersRefresh(false));
-  }, [refetch]);
 
   const radarDrops = useMemo(() => {
     if (!data?.ok || !data.offerte?.length || !userPos) return [];
@@ -294,26 +287,10 @@ const Index = () => {
                 </div>
               )}
 
-              {webAppBase && (
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={() => refreshOffersManual()}
-                    disabled={manualOffersRefresh}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-secondary/40 px-2.5 py-1.5 text-xs font-medium text-foreground"
-                  >
-                    <RefreshCw
-                      className={`h-3.5 w-3.5 ${manualOffersRefresh ? "animate-spin" : ""}`}
-                      strokeWidth={1.25}
-                    />
-                    Aggiorna
-                  </button>
-                  {data?.ok && typeof data.raggio_km === "number" && (
-                    <span className="text-[11px] text-muted-foreground">
-                      Raggio radar ≈ {data.raggio_km.toFixed(2)} km
-                    </span>
-                  )}
-                </div>
+              {webAppBase && data?.ok && typeof data.raggio_km === "number" && (
+                <p className="mb-3 text-[11px] text-muted-foreground">
+                  Raggio radar ≈ {data.raggio_km.toFixed(2)} km
+                </p>
               )}
 
               {isPending && webAppBase && (
