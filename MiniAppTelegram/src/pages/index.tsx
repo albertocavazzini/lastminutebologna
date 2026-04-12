@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -40,6 +34,9 @@ import MapView from "@/components/MapView";
 
 /** Se la cache è più recente, non richiamiamo il GPS aprendo la mappa (meno prompt nel WebView). */
 const REFINE_MAP_MIN_INTERVAL_MS = 30 * 60 * 1000;
+
+/** Polling offerte sul tab radar (mappa/elenco); fermo su altre tab per risparmiare quota Apps Script. */
+const RADAR_OFFERTE_REFETCH_MS = 30_000;
 import DropDetail from "@/components/DropDetail";
 import BottomNav from "@/components/BottomNav";
 import ProfileView from "@/components/ProfileView";
@@ -62,6 +59,7 @@ const Index = () => {
   );
   const [geoDenied, setGeoDenied] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
+  const [manualOffersRefresh, setManualOffersRefresh] = useState(false);
 
   const webAppBase = projectEnv.appsScriptWebAppBase?.trim() ?? "";
 
@@ -145,12 +143,18 @@ const Index = () => {
     prevViewMode.current = viewMode;
   }, [activeTab, viewMode, refineLocation]);
 
-  const { data, isPending, isError, error, refetch, isFetching } = useQuery({
+  const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ["miniapp-offerte", webAppBase],
     queryFn: () => fetchMiniappOfferteJsonp(webAppBase),
     staleTime: 30_000,
     enabled: Boolean(webAppBase),
+    refetchInterval: activeTab === "radar" ? RADAR_OFFERTE_REFETCH_MS : false,
   });
+
+  const refreshOffersManual = useCallback(() => {
+    setManualOffersRefresh(true);
+    void refetch().finally(() => setManualOffersRefresh(false));
+  }, [refetch]);
 
   const radarDrops = useMemo(() => {
     if (!data?.ok || !data.offerte?.length || !userPos) return [];
@@ -294,12 +298,12 @@ const Index = () => {
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <button
                     type="button"
-                    onClick={() => refetch()}
-                    disabled={isFetching}
+                    onClick={() => refreshOffersManual()}
+                    disabled={manualOffersRefresh}
                     className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-secondary/40 px-2.5 py-1.5 text-xs font-medium text-foreground"
                   >
                     <RefreshCw
-                      className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`}
+                      className={`h-3.5 w-3.5 ${manualOffersRefresh ? "animate-spin" : ""}`}
                       strokeWidth={1.25}
                     />
                     Aggiorna
