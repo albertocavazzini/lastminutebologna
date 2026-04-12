@@ -287,12 +287,6 @@ const Index = () => {
                 </div>
               )}
 
-              {webAppBase && data?.ok && typeof data.raggio_km === "number" && (
-                <p className="mb-3 text-[11px] text-muted-foreground">
-                  Raggio radar ≈ {data.raggio_km.toFixed(2)} km
-                </p>
-              )}
-
               {isPending && webAppBase && (
                 <p className="text-sm text-muted-foreground">
                   Caricamento offerte…
