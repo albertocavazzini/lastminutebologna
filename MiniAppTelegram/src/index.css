@@ -9,46 +9,6 @@
   max-width: none !important;
 }
 
-/*
- * Telegram Mini App fullscreen: spesso env(safe-area-inset-*) resta 0 nel WebView.
- * Telegram espone anche --tg-safe-area-inset-* e --tg-content-safe-area-inset-*
- * (e noi le sincronizziamo da JS in initTelegramWebApp se servono).
- */
-.lmb-header-safe-pt {
-  /* Extra sotto barra Telegram / notch: oltre agli inset ufficiali */
-  padding-top: calc(
-    env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) +
-      var(--tg-content-safe-area-inset-top, 0px) + 1rem
-  );
-}
-
-.lmb-nav-safe-pb {
-  padding-bottom: calc(
-    env(safe-area-inset-bottom, 0px) + var(--tg-safe-area-inset-bottom, 0px) +
-      var(--tg-content-safe-area-inset-bottom, 0px) + 0.625rem
-  );
-}
-
-.lmb-main-scroll-pb {
-  padding-bottom: calc(
-    5rem + env(safe-area-inset-bottom, 0px) +
-      var(--tg-safe-area-inset-bottom, 0px) +
-      var(--tg-content-safe-area-inset-bottom, 0px) + 0.625rem
-  );
-}
-
-.lmb-map-viewport-height {
-  height: calc(
-    100dvh - 12.5rem - env(safe-area-inset-top, 0px) -
-      var(--tg-safe-area-inset-top, 0px) -
-      var(--tg-content-safe-area-inset-top, 0px) -
-      env(safe-area-inset-bottom, 0px) -
-      var(--tg-safe-area-inset-bottom, 0px) -
-      var(--tg-content-safe-area-inset-bottom, 0px)
-  );
-  min-height: 240px;
-}
-
 @layer base {
   :root {
     /* Cloud White — sezioni, mappa */
@@ -182,4 +142,43 @@
 
 .animate-ping-drop {
   animation: ping-drop 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/*
+ * Telegram Mini App: env() nel WebView spesso è 0; servono --tg-* (sync in initTelegramWebApp).
+ * Regole in fondo al foglio, selettori tipo elemento + !important: così non le coprono
+ * l’ordine dei @layer di Tailwind o stili del WebView.
+ */
+header.lmb-header-safe-pt {
+  padding-top: calc(
+    env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) +
+      var(--tg-content-safe-area-inset-top, 0px) + 1rem
+  ) !important;
+}
+
+nav.lmb-nav-safe-pb {
+  padding-bottom: calc(
+    env(safe-area-inset-bottom, 0px) + var(--tg-safe-area-inset-bottom, 0px) +
+      var(--tg-content-safe-area-inset-bottom, 0px) + 0.625rem
+  ) !important;
+}
+
+main.lmb-main-scroll-pb {
+  padding-bottom: calc(
+    5rem + env(safe-area-inset-bottom, 0px) +
+      var(--tg-safe-area-inset-bottom, 0px) +
+      var(--tg-content-safe-area-inset-bottom, 0px) + 0.625rem
+  ) !important;
+}
+
+.lmb-map-viewport-height {
+  min-height: 240px;
+  height: calc(
+    100dvh - 12.5rem - env(safe-area-inset-top, 0px) -
+      var(--tg-safe-area-inset-top, 0px) -
+      var(--tg-content-safe-area-inset-top, 0px) -
+      env(safe-area-inset-bottom, 0px) -
+      var(--tg-safe-area-inset-bottom, 0px) -
+      var(--tg-content-safe-area-inset-bottom, 0px)
+  ) !important;
 }
