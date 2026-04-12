@@ -41,11 +41,29 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
     refetchOnWindowFocus: false,
   });
 
+  const list = useMemo(
+    () => (data?.ok ? (data.prenotazioni ?? []) : []),
+    [data],
+  );
+
+  /** Solo prenotazioni non ancora validate al locale (QR ancora da usare). Una alla volta: la più recente. */
+  const qrAttivo = useMemo(() => {
+    const pendenti = list.filter((p) => !p.validata);
+    pendenti.sort((a, b) => {
+      const ta = new Date(a.timestamp).getTime();
+      const tb = new Date(b.timestamp).getTime();
+      const na = Number.isFinite(ta) ? ta : 0;
+      const nb = Number.isFinite(tb) ? tb : 0;
+      return nb - na;
+    });
+    return pendenti[0] ?? null;
+  }, [list]);
+
   if (!webAppBase) {
     return (
       <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-sm text-amber-900 dark:text-amber-100">
-        Configura l&apos;URL della web app (runtime-config o variabili d&apos;ambiente)
-        per caricare le prenotazioni.
+        Configura l&apos;URL della web app (runtime-config o variabili
+        d&apos;ambiente) per caricare le prenotazioni.
       </p>
     );
   }
@@ -60,8 +78,8 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
         <p className="text-sm text-muted-foreground">
           Apri questa pagina come{" "}
           <strong className="text-foreground">mini app Telegram</strong> (menu
-          del bot o pulsante con link alla web app): solo così il sistema riconosce
-          il tuo account e può mostrare le prenotazioni e il QR.
+          del bot o pulsante con link alla web app): solo così il sistema
+          riconosce il tuo account e può mostrare le prenotazioni e il QR.
         </p>
       </div>
     );
@@ -80,27 +98,10 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
         ? (data.error ?? "Errore")
         : null;
 
-  const list = data?.ok ? data.prenotazioni ?? [] : [];
-
-  /** Solo prenotazioni non ancora validate al locale (QR ancora da usare). Una alla volta: la più recente. */
-  const qrAttivo = useMemo(() => {
-    const pendenti = list.filter((p) => !p.validata);
-    pendenti.sort((a, b) => {
-      const ta = new Date(a.timestamp).getTime();
-      const tb = new Date(b.timestamp).getTime();
-      const na = Number.isFinite(ta) ? ta : 0;
-      const nb = Number.isFinite(tb) ? tb : 0;
-      return nb - na;
-    });
-    return pendenti[0] ?? null;
-  }, [list]);
-
   return (
     <div className="space-y-4 pb-8">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-bold text-foreground">
-          Il tuo QR
-        </h2>
+        <h2 className="text-lg font-bold text-foreground">Il tuo QR</h2>
         <Button
           type="button"
           variant="outline"
@@ -130,9 +131,9 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
 
       {!isPending && data?.ok && list.length === 0 && (
         <p className="rounded-xl border border-border/50 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
-          Non hai prenotazioni attive. Prenota un&apos;offerta dal radar (Prenota
-          nel bot): quando confermata, il QR apparirà qui fino alla scansione al
-          locale.
+          Non hai prenotazioni attive. Prenota un&apos;offerta dal radar
+          (Prenota nel bot): quando confermata, il QR apparirà qui fino alla
+          scansione al locale.
         </p>
       )}
 
@@ -161,7 +162,10 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
                 Da mostrare al locale
               </span>
               <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Store className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.25} />
+                <Store
+                  className="h-4 w-4 shrink-0 text-muted-foreground"
+                  strokeWidth={1.25}
+                />
                 {qrAttivo.locale || "Locale"}
               </p>
               <p className="flex items-center gap-2 text-xs text-muted-foreground">

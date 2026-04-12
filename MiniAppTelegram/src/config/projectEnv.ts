@@ -10,6 +10,8 @@ declare global {
     __LMB_RUNTIME__?: {
       appsScriptWebAppBase?: string;
       publicMiniAppUrl?: string;
+      /** Username bot senza @ (es. LastMinuteBolognaBot) per link t.me dal profilo. */
+      telegramBotUsername?: string;
     };
   }
 }
@@ -31,6 +33,14 @@ export function getPublicMiniAppUrl(): string {
   return (fromRuntime()?.publicMiniAppUrl ?? "").trim();
 }
 
+export function getTelegramBotUsername(): string {
+  const raw = (
+    (import.meta.env.VITE_TELEGRAM_BOT_USERNAME ?? "").trim() ||
+    (fromRuntime()?.telegramBotUsername ?? "").trim()
+  ).replace(/^@/, "");
+  return raw;
+}
+
 /** Accesso tipizzato; i campi sono letti a ogni accesso (dopo il fetch in bootstrap). */
 export const projectEnv = {
   get appsScriptWebAppBase() {
@@ -38,5 +48,8 @@ export const projectEnv = {
   },
   get publicMiniAppUrl() {
     return getPublicMiniAppUrl();
+  },
+  get telegramBotUsername() {
+    return getTelegramBotUsername();
   },
 };

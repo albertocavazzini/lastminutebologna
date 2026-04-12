@@ -10,10 +10,23 @@ type SafeAreaInset = {
   right: number;
 };
 
+/** Utente dalla mini app (solo in contesto Telegram; non firmato come initData). */
+export type TelegramWebAppUser = {
+  id?: number;
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+};
+
 type TelegramWebApp = {
   ready: () => void;
   expand: () => void;
   initData: string;
+  initDataUnsafe?: {
+    user?: TelegramWebAppUser;
+    [key: string]: unknown;
+  };
+  openTelegramLink?: (url: string) => void;
   colorScheme?: "light" | "dark";
   safeAreaInset?: SafeAreaInset;
   contentSafeAreaInset?: SafeAreaInset;
@@ -23,6 +36,22 @@ type TelegramWebApp = {
 /** Stringa firmata da Telegram (`query_id=…&user=…&hash=…`). Vuota fuori da Telegram. */
 export function getTelegramInitData(): string {
   return window.Telegram?.WebApp?.initData?.trim() ?? "";
+}
+
+/** Dati utente esposti dal client Telegram (profilo mini app). Null fuori da Telegram o se assenti. */
+export function getTelegramWebAppUser(): TelegramWebAppUser | null {
+  const u = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  if (!u || typeof u !== "object") return null;
+  return u;
+}
+
+export function formatTelegramDisplayName(u: TelegramWebAppUser): string {
+  const parts = [u.first_name, u.last_name].filter(
+    (s) => typeof s === "string" && s.trim(),
+  ) as string[];
+  if (parts.length) return parts.join(" ").trim();
+  if (u.username?.trim()) return `@${u.username.replace(/^@/, "")}`;
+  return "Utente Telegram";
 }
 
 declare global {
