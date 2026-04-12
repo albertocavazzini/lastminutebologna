@@ -28,6 +28,8 @@ export type MiniappOfferteResponse = {
   geo_precisione?: number;
 };
 
+export const MINIAPP_OFFERTE_QUERY_ROOT = "miniapp-offerte" as const;
+
 function secondsUntilScadenzaLocale(scadenzaHHmm: string): number {
   const m = /^(\d{1,2}):(\d{2})$/.exec(String(scadenzaHHmm || "").trim());
   if (!m) return 3600;

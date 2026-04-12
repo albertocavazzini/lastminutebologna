@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -20,6 +21,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { Drop } from "@/data/mockDrops";
+import { MINIAPP_OFFERTE_QUERY_ROOT } from "@/api/miniappOfferte";
+import { MINIAPP_PRENOTAZIONI_QUERY_ROOT } from "@/api/miniappPrenotazioni";
 
 interface DropDetailProps {
   drop: Drop | null;
@@ -39,6 +42,7 @@ const DropDetail = ({
   onClose,
   idsOfferteConPrenotazione = new Set(),
 }: DropDetailProps) => {
+  const queryClient = useQueryClient();
   const [remaining, setRemaining] = useState(0);
   const [step, setStep] = useState<"detail" | "qr" | "confirmed">("detail");
   const [limitePrenotaOpen, setLimitePrenotaOpen] = useState(false);
@@ -73,6 +77,8 @@ const DropDetail = ({
     } else {
       window.open(url, "_blank", "noopener,noreferrer");
     }
+    void queryClient.invalidateQueries({ queryKey: [MINIAPP_PRENOTAZIONI_QUERY_ROOT] });
+    void queryClient.invalidateQueries({ queryKey: [MINIAPP_OFFERTE_QUERY_ROOT] });
     onClose();
   };
 

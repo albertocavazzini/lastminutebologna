@@ -1,7 +1,10 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, QrCode, Store } from "lucide-react";
-import { fetchMiniappPrenotazioniJsonp } from "@/api/miniappPrenotazioni";
+import {
+  fetchMiniappPrenotazioniJsonp,
+  MINIAPP_PRENOTAZIONI_STALE_MS,
+} from "@/api/miniappPrenotazioni";
 import { projectEnv } from "@/config/projectEnv";
 import { getTelegramInitData } from "@/lib/telegramWebApp";
 import { Button } from "@/components/ui/button";
@@ -34,7 +37,8 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
     queryKey: ["miniapp-prenotazioni", webAppBase, initData.slice(0, 80)],
     queryFn: () => fetchMiniappPrenotazioniJsonp(webAppBase, initData),
     enabled: Boolean(webAppBase && initData),
-    staleTime: 20_000,
+    staleTime: MINIAPP_PRENOTAZIONI_STALE_MS,
+    refetchOnWindowFocus: false,
   });
 
   if (!webAppBase) {

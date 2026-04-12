@@ -14,6 +14,11 @@ export type MiniappPrenotazioniResponse = {
   prenotazioni?: MiniappPrenotazioneRow[];
 };
 
+/** StaleTime condiviso (Index + Prenotazioni): meno GET al cambio tab; si rivalida dopo bot / visibility. */
+export const MINIAPP_PRENOTAZIONI_STALE_MS = 60_000;
+
+export const MINIAPP_PRENOTAZIONI_QUERY_ROOT = "miniapp-prenotazioni" as const;
+
 /**
  * JSONP: `mode=api_miniapp&action=prenotazioni_mie&init_data=…`
  * Nota: initData può essere lunga; se la richiesta fallisce, prova da Telegram (non browser desktop senza mini app).

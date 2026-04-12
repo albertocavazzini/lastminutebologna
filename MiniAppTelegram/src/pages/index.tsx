@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Zap,
@@ -18,7 +18,11 @@ import {
   filterOffersRadarStyle,
   offertaToDrop,
 } from "@/api/miniappOfferte";
-import { fetchMiniappPrenotazioniJsonp } from "@/api/miniappPrenotazioni";
+import {
+  fetchMiniappPrenotazioniJsonp,
+  MINIAPP_PRENOTAZIONI_QUERY_ROOT,
+  MINIAPP_PRENOTAZIONI_STALE_MS,
+} from "@/api/miniappPrenotazioni";
 import { projectEnv } from "@/config/projectEnv";
 import { getTelegramInitData } from "@/lib/telegramWebApp";
 import {
@@ -39,6 +43,10 @@ const REFINE_MAP_MIN_INTERVAL_MS = 30 * 60 * 1000;
 /** Polling offerte sul tab radar (mappa/elenco); fermo su altre tab per risparmiare quota Apps Script. */
 const RADAR_OFFERTE_REFETCH_MS = 60_000;
 
+/** Tornato da bot / altra app: rivalida prenotazioni al massimo ogni così tanti ms. */
+const VISIBILITY_PRENOTAZIONI_COOLDOWN_MS = 30_000;
+const VISIBILITY_MIN_HIDDEN_MS = 3_000;
+
 import DropDetail from "@/components/DropDetail";
 import BottomNav from "@/components/BottomNav";
 import ProfileView from "@/components/ProfileView";
@@ -48,6 +56,7 @@ import PrenotazioniView, {
 import AlertsView from "@/components/AlertsView";
 
 const Index = () => {
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("radar");
   const [viewMode, setViewMode] = useState<"map" | "list">("list");
   const [prenotazioniSubView, setPrenotazioniSubView] =
@@ -145,6 +154,32 @@ const Index = () => {
     prevViewMode.current = viewMode;
   }, [activeTab, viewMode, refineLocation]);
 
+  const hiddenAtRef = useRef<number | null>(null);
+  const lastVisibilityPrenotazioniRef = useRef(0);
+
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === "hidden") {
+        hiddenAtRef.current = Date.now();
+        return;
+      }
+      const t = hiddenAtRef.current;
+      hiddenAtRef.current = null;
+      if (t == null) return;
+      if (Date.now() - t < VISIBILITY_MIN_HIDDEN_MS) return;
+      const now = Date.now();
+      if (now - lastVisibilityPrenotazioniRef.current < VISIBILITY_PRENOTAZIONI_COOLDOWN_MS) {
+        return;
+      }
+      lastVisibilityPrenotazioniRef.current = now;
+      void queryClient.invalidateQueries({
+        queryKey: [MINIAPP_PRENOTAZIONI_QUERY_ROOT],
+      });
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, [queryClient]);
+
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["miniapp-offerte", webAppBase],
     queryFn: () => fetchMiniappOfferteJsonp(webAppBase),
@@ -157,7 +192,8 @@ const Index = () => {
     queryKey: ["miniapp-prenotazioni", webAppBase, initData.slice(0, 80)],
     queryFn: () => fetchMiniappPrenotazioniJsonp(webAppBase, initData),
     enabled: Boolean(webAppBase && initData),
-    staleTime: 20_000,
+    staleTime: MINIAPP_PRENOTAZIONI_STALE_MS,
+    refetchOnWindowFocus: false,
   });
 
   /** Solo prenotazioni con QR ancora da usare: dopo validazione si può riprenotare. */
