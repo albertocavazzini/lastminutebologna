@@ -15,7 +15,7 @@ const tabs = [
 const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
   return (
     <nav className="lmb-nav-safe-pb fixed bottom-0 left-0 right-0 z-40 glass-strong border-t border-border/30">
-      <div className="mx-auto flex min-h-16 max-w-md items-center justify-around px-1 pt-0.5">
+      <div className="mx-auto flex min-h-14 max-w-md items-center justify-around px-1 pt-0">
         {tabs.map((tab) => {
           const isActive = active === tab.id;
           return (
@@ -23,7 +23,7 @@ const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
               key={tab.id}
               type="button"
               onClick={() => onNavigate(tab.id)}
-              className={`relative flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-0.5 px-3 py-2 transition-colors ${
+              className={`relative flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-0.5 px-3 py-1.5 transition-colors ${
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
