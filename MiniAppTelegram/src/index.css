@@ -159,7 +159,7 @@ header.lmb-header-safe-pt {
 nav.lmb-nav-safe-pb {
   padding-bottom: calc(
     env(safe-area-inset-bottom, 0px) + var(--tg-safe-area-inset-bottom, 0px) +
-      var(--tg-content-safe-area-inset-bottom, 0px) + 0.625rem
+      var(--tg-content-safe-area-inset-bottom, 0px) + 0.25rem
   ) !important;
 }
 
@@ -167,14 +167,14 @@ main.lmb-main-scroll-pb {
   padding-bottom: calc(
     5rem + env(safe-area-inset-bottom, 0px) +
       var(--tg-safe-area-inset-bottom, 0px) +
-      var(--tg-content-safe-area-inset-bottom, 0px) + 0.625rem
+      var(--tg-content-safe-area-inset-bottom, 0px) + 0.25rem
   ) !important;
 }
 
 .lmb-map-viewport-height {
   min-height: 240px;
   height: calc(
-    100dvh - 12.5rem - env(safe-area-inset-top, 0px) -
+    100dvh - 12.125rem - env(safe-area-inset-top, 0px) -
       var(--tg-safe-area-inset-top, 0px) -
       var(--tg-content-safe-area-inset-top, 0px) -
       env(safe-area-inset-bottom, 0px) -
