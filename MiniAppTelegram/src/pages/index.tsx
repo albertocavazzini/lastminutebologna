@@ -36,7 +36,7 @@ import MapView from "@/components/MapView";
 const REFINE_MAP_MIN_INTERVAL_MS = 30 * 60 * 1000;
 
 /** Polling offerte sul tab radar (mappa/elenco); fermo su altre tab per risparmiare quota Apps Script. */
-const RADAR_OFFERTE_REFETCH_MS = 30_000;
+const RADAR_OFFERTE_REFETCH_MS = 60_000;
 import DropDetail from "@/components/DropDetail";
 import BottomNav from "@/components/BottomNav";
 import ProfileView from "@/components/ProfileView";
@@ -146,7 +146,7 @@ const Index = () => {
   const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ["miniapp-offerte", webAppBase],
     queryFn: () => fetchMiniappOfferteJsonp(webAppBase),
-    staleTime: 30_000,
+    staleTime: 60_000,
     enabled: Boolean(webAppBase),
     refetchInterval: activeTab === "radar" ? RADAR_OFFERTE_REFETCH_MS : false,
   });
