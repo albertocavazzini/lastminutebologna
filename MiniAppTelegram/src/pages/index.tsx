@@ -160,10 +160,12 @@ const Index = () => {
     staleTime: 20_000,
   });
 
+  /** Solo prenotazioni con QR ancora da usare: dopo validazione si può riprenotare. */
   const idsOfferteConPrenotazione = useMemo(() => {
     const s = new Set<string>();
     if (!prenotazioniData?.ok || !prenotazioniData.prenotazioni) return s;
     for (const p of prenotazioniData.prenotazioni) {
+      if (p.validata) continue;
       const id = String(p.id_offerta || "").trim();
       if (id) s.add(id);
     }
