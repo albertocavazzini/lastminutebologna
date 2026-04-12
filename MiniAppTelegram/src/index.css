@@ -18,14 +18,14 @@
   /* Extra sotto barra Telegram / notch: oltre agli inset ufficiali */
   padding-top: calc(
     env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) +
-      var(--tg-content-safe-area-inset-top, 0px) + 1.75rem
+      var(--tg-content-safe-area-inset-top, 0px) + 1.5rem
   );
 }
 
 .lmb-nav-safe-pb {
   padding-bottom: calc(
     env(safe-area-inset-bottom, 0px) + var(--tg-safe-area-inset-bottom, 0px) +
-      var(--tg-content-safe-area-inset-bottom, 0px) + 1.25rem
+      var(--tg-content-safe-area-inset-bottom, 0px) + 1rem
   );
 }
 
@@ -33,14 +33,13 @@
   padding-bottom: calc(
     5rem + env(safe-area-inset-bottom, 0px) +
       var(--tg-safe-area-inset-bottom, 0px) +
-      var(--tg-content-safe-area-inset-bottom, 0px) + 1.25rem
+      var(--tg-content-safe-area-inset-bottom, 0px) + 1rem
   );
 }
 
 .lmb-map-viewport-height {
-  /* +1rem vs prima: allineato al padding-top extra dell’header */
   height: calc(
-    100dvh - 13.75rem - env(safe-area-inset-top, 0px) -
+    100dvh - 13.25rem - env(safe-area-inset-top, 0px) -
       var(--tg-safe-area-inset-top, 0px) -
       var(--tg-content-safe-area-inset-top, 0px) -
       env(safe-area-inset-bottom, 0px) -
