@@ -179,7 +179,7 @@ const Index = () => {
 
   return (
     <div className="relative mx-auto min-h-screen min-h-[100dvh] max-w-md bg-background">
-      <header className="sticky top-0 z-30 glass-strong px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))]">
+      <header className="sticky top-0 z-30 glass-strong px-4 pb-3 pt-[calc(env(safe-area-inset-top,0px)+0.875rem)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-primary" strokeWidth={1.25} />
@@ -248,7 +248,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="px-4 pt-3 pb-[calc(5rem+env(safe-area-inset-bottom,0px))]">
+      <main className="px-4 pt-3 pb-[calc(5rem+1.25rem+env(safe-area-inset-bottom,0px))]">
         <AnimatePresence mode="wait">
           {activeTab === "radar" && (
             <motion.div
@@ -384,7 +384,7 @@ const Index = () => {
                 )}
 
               {viewMode === "map" ? (
-                <div className="h-[calc(100dvh-10.5rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] min-h-[240px]">
+                <div className="h-[calc(100dvh-12.75rem-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] min-h-[240px]">
                   <MapView
                     drops={radarDrops}
                     onSelectDrop={setSelectedDrop}
