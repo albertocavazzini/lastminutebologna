@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type TouchEvent,
+} from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, Map, List, MapPin, MessageSquare, Ticket } from "lucide-react";
@@ -63,6 +70,8 @@ const Index = () => {
   );
   const [geoDenied, setGeoDenied] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
+  const pullStartYRef = useRef<number | null>(null);
+  const pullTriggeredRef = useRef(false);
 
   const webAppBase = projectEnv.appsScriptWebAppBase?.trim() ?? "";
   const initData = getTelegramInitData();
@@ -176,7 +185,7 @@ const Index = () => {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [queryClient]);
 
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isPending, isError, error, refetch: refetchOfferte } = useQuery({
     queryKey: ["miniapp-offerte", webAppBase],
     queryFn: () => fetchMiniappOfferteJsonp(webAppBase),
     staleTime: 60_000,
@@ -228,6 +237,31 @@ const Index = () => {
       : data && !data.ok
         ? (data.error ?? "Risposta non valida")
         : null;
+
+  const onMapTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
+    pullStartYRef.current = e.touches[0]?.clientY ?? null;
+    pullTriggeredRef.current = false;
+  }, []);
+
+  const onMapTouchMove = useCallback(
+    (e: TouchEvent<HTMLDivElement>) => {
+      if (viewMode !== "map" || activeTab !== "radar" || !webAppBase) return;
+      if (pullTriggeredRef.current) return;
+      const startY = pullStartYRef.current;
+      if (startY == null) return;
+      const currentY = e.touches[0]?.clientY ?? startY;
+      const deltaY = currentY - startY;
+      if (deltaY < 80) return;
+      pullTriggeredRef.current = true;
+      void refetchOfferte();
+    },
+    [activeTab, refetchOfferte, viewMode, webAppBase],
+  );
+
+  const onMapTouchEnd = useCallback(() => {
+    pullStartYRef.current = null;
+    pullTriggeredRef.current = false;
+  }, []);
 
   return (
     <div className="relative mx-auto min-h-screen min-h-[100dvh] max-w-md bg-background">
@@ -414,7 +448,13 @@ const Index = () => {
                 )}
 
               {viewMode === "map" ? (
-                <div className="lmb-map-viewport-height">
+                <div
+                  className="lmb-map-viewport-height"
+                  onTouchStart={onMapTouchStart}
+                  onTouchMove={onMapTouchMove}
+                  onTouchEnd={onMapTouchEnd}
+                  onTouchCancel={onMapTouchEnd}
+                >
                   <MapView
                     drops={radarDrops}
                     onSelectDrop={setSelectedDrop}
