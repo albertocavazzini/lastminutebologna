@@ -21,7 +21,7 @@ const AlertsView = () => {
               : "bg-secondary/50 text-muted-foreground"
           }`}
         >
-          <CircleHelp className="h-4 w-4" strokeWidth={1.25} />
+          <CircleHelp className="h-5 w-5" strokeWidth={1.25} />
         </button>
       </div>
 
