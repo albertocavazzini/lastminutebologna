@@ -50,22 +50,24 @@ const AlertsView = () => {
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-border/60 bg-card/80 p-4 shadow-card">
-        <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15">
-            <Bell className="h-4 w-4 text-primary" strokeWidth={1.25} />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">
-              Nessun avviso recente
-            </h3>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              Quando collegheremo il backend, qui vedrai lo storico delle
-              notifiche e delle offerte segnalate.
-            </p>
+      {!showCenterInfo ? (
+        <div className="rounded-2xl border border-border/60 bg-card/80 p-4 shadow-card">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15">
+              <Bell className="h-4 w-4 text-primary" strokeWidth={1.25} />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">
+                Nessun avviso recente
+              </h3>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Quando collegheremo il backend, qui vedrai lo storico delle
+                notifiche e delle offerte segnalate.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 };
