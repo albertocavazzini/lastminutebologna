@@ -43,8 +43,7 @@ const AlertsView = () => {
                 Qui potrai ritrovare le{" "}
                 <strong className="text-foreground">notifiche già inviate</strong>{" "}
                 o le offerte segnalate (locale, orario, link), utile se hai
-                silenziato la chat del bot. Quando collegheremo il backend,
-                comparirà l’elenco in questa sezione.
+                silenziato la chat del bot.
               </p>
             </div>
           </div>
