@@ -20,9 +20,6 @@
   },
   "include": [
     "vite.config.ts",
-    "tailwind.config.ts",
-    "playwright.config.ts",
-    "playwright-fixture.ts",
-    "capacitor.config.ts"
+    "tailwind.config.ts"
   ]
 }

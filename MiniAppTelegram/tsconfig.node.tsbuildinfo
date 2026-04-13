@@ -1,1 +1,0 @@
-{"root":["./vite.config.ts","./tailwind.config.ts","./playwright.config.ts","./playwright-fixture.ts","./capacitor.config.ts"],"version":"5.9.3"}

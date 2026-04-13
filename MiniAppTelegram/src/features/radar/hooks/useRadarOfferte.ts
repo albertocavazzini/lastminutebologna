@@ -1,0 +1,56 @@
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  datasetSupportaRadar,
+  fetchMiniappOfferteJsonp,
+  filterOffersRadarStyle,
+  offertaToDrop,
+} from "@/api/miniappOfferte";
+import type { UserMapPosition } from "@/lib/geo/userMapPosition";
+
+const RADAR_OFFERTE_REFETCH_MS = 60_000;
+const RADAR_DEFAULT_KM = 5.12;
+const RADAR_DEFAULT_PRECISION = 6;
+
+export function useRadarOfferte({
+  webAppBase,
+  activeTab,
+  userPos,
+}: {
+  webAppBase: string;
+  activeTab: string;
+  userPos: UserMapPosition | null;
+}) {
+  const query = useQuery({
+    queryKey: ["miniapp-offerte", webAppBase],
+    queryFn: () => fetchMiniappOfferteJsonp(webAppBase),
+    staleTime: 60_000,
+    enabled: Boolean(webAppBase),
+    refetchInterval: activeTab === "radar" ? RADAR_OFFERTE_REFETCH_MS : false,
+  });
+
+  const radarDrops = useMemo(() => {
+    const data = query.data;
+    if (!data?.ok || !data.offerte?.length || !userPos) return [];
+    const raw = data.offerte;
+    if (!datasetSupportaRadar(raw)) return [];
+    const filtered = filterOffersRadarStyle(
+      raw,
+      userPos.lat,
+      userPos.lng,
+      data.raggio_km ?? RADAR_DEFAULT_KM,
+      data.geo_precisione ?? RADAR_DEFAULT_PRECISION,
+    );
+    return filtered
+      .map((o) => offertaToDrop(o, userPos.lat, userPos.lng))
+      .sort((a, b) => a.distance - b.distance);
+  }, [query.data, userPos]);
+
+  return {
+    ...query,
+    radarDrops,
+    supportaRadarDataset: Boolean(
+      query.data?.ok && query.data.offerte?.length && datasetSupportaRadar(query.data.offerte),
+    ),
+  };
+}
