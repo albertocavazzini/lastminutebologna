@@ -238,14 +238,14 @@ const Index = () => {
         ? (data.error ?? "Risposta non valida")
         : null;
 
-  const onMapTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
+  const onRadarTouchStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
     pullStartYRef.current = e.touches[0]?.clientY ?? null;
     pullTriggeredRef.current = false;
   }, []);
 
-  const onMapTouchMove = useCallback(
+  const onRadarTouchMove = useCallback(
     (e: TouchEvent<HTMLDivElement>) => {
-      if (viewMode !== "map" || activeTab !== "radar" || !webAppBase) return;
+      if (viewMode !== "list" || activeTab !== "radar" || !webAppBase) return;
       if (pullTriggeredRef.current) return;
       const startY = pullStartYRef.current;
       if (startY == null) return;
@@ -262,7 +262,7 @@ const Index = () => {
     [activeTab, refetchOfferte, viewMode, webAppBase],
   );
 
-  const onMapTouchEnd = useCallback(() => {
+  const onRadarTouchEnd = useCallback(() => {
     pullStartYRef.current = null;
     pullTriggeredRef.current = false;
   }, []);
@@ -452,14 +452,7 @@ const Index = () => {
                 )}
 
               {viewMode === "map" ? (
-                <div
-                  className="lmb-map-viewport-height overscroll-y-contain"
-                  style={{ overscrollBehaviorY: "contain" }}
-                  onTouchStart={onMapTouchStart}
-                  onTouchMove={onMapTouchMove}
-                  onTouchEnd={onMapTouchEnd}
-                  onTouchCancel={onMapTouchEnd}
-                >
+                <div className="lmb-map-viewport-height">
                   <MapView
                     drops={radarDrops}
                     onSelectDrop={setSelectedDrop}
@@ -476,7 +469,14 @@ const Index = () => {
                     )}
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div
+                  className="space-y-3 overscroll-y-contain"
+                  style={{ overscrollBehaviorY: "contain" }}
+                  onTouchStart={onRadarTouchStart}
+                  onTouchMove={onRadarTouchMove}
+                  onTouchEnd={onRadarTouchEnd}
+                  onTouchCancel={onRadarTouchEnd}
+                >
                   <div className="mb-1 flex items-center gap-2">
                     <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
                     <span className="text-xs text-muted-foreground">
