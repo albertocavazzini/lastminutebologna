@@ -19,8 +19,12 @@ const FAQ_SUPPORT = [
     a: "Dal radar apri il dettaglio e tocca «Prenota nel bot»: si apre la chat con il bot Telegram dove completi la prenotazione e ricevi il QR.",
   },
   {
+    q: "Come funziona il radar",
+    a: "Le offerte che vedi in elenco e sulla mappa sono quelle attive adesso nel raggio impostato dal servizio, filtrate come sul bot (geohash + distanza). L’elenco si aggiorna periodicamente mentre resti sulla sezione Mappa.",
+  },
+  {
     q: "Perché chiediamo la posizione?",
-    a: "Per mostrarti le offerte last minute nel raggio corretto (come sul bot), usando geohash e distanza. Senza GPS l’elenco radar non è disponibile.",
+    a: "Serve solo per mostrarti le offerte vicino a te. La richiesta passa dal browser/Telegram: non memorizziamo la posizione lato mini app oltre a quanto serve al radar in sessione. Se rifiuti il permesso, puoi comunque usare il bot in chat per le offerte.",
   },
   {
     q: "Supporto",
