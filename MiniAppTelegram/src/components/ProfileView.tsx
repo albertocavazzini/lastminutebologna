@@ -20,7 +20,7 @@ const FAQ_SUPPORT = [
   },
   {
     q: "Come funziona il radar",
-    a: "Le offerte che vedi in elenco e sulla mappa sono quelle attive adesso nel raggio impostato dal servizio, filtrate come sul bot (geohash + distanza). L’elenco si aggiorna periodicamente mentre resti sulla sezione Mappa.",
+    a: "Le offerte che vedi in elenco e sulla mappa sono quelle attive adesso nel raggio impostato dal servizio, filtrate come sul bot (geohash + distanza). L’elenco si aggiorna periodicamente mentre resti sulla sezione Offerte.",
   },
   {
     q: "Perché chiediamo la posizione?",

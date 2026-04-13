@@ -131,7 +131,7 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
 
       {!isPending && data?.ok && list.length === 0 && (
         <p className="rounded-xl border border-border/50 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
-          Non hai prenotazioni attive. Prenota un&apos;offerta dal radar
+          Non hai prenotazioni attive. Prenota un&apos;offerta dalla sezione Offerte
           (Prenota nel bot): quando confermata, il QR apparirà qui fino alla
           scansione al locale.
         </p>
@@ -140,7 +140,7 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
       {!isPending && data?.ok && list.length > 0 && !qrAttivo && (
         <p className="rounded-xl border border-border/50 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
           Nessun QR da mostrare: non hai prenotazioni in attesa di scansione al
-          locale. Puoi prenotare una nuova offerta dal radar o dal bot.
+          locale. Puoi prenotare una nuova offerta dalla sezione Offerte o dal bot.
         </p>
       )}
 

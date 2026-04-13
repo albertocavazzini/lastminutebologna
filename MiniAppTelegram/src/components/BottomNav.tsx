@@ -1,4 +1,4 @@
-import { Map, User, Ticket } from "lucide-react";
+import { Tag, User, Ticket } from "lucide-react";
 
 interface BottomNavProps {
   active: string;
@@ -6,7 +6,7 @@ interface BottomNavProps {
 }
 
 const tabs = [
-  { id: "radar", icon: Map, label: "Mappa" },
+  { id: "radar", icon: Tag, label: "Offerte" },
   { id: "prenotazioni", icon: Ticket, label: "Prenotazioni" },
   { id: "profile", icon: User, label: "Profilo" },
 ];
