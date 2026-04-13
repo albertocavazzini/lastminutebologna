@@ -60,6 +60,17 @@ const ProfileView = () => {
     if (!botUrl) return;
     if (tw && typeof tw.openTelegramLink === "function") {
       tw.openTelegramLink(botUrl);
+      // Se la chat è già quella corrente, openTelegramLink può non cambiare vista:
+      // chiudiamo comunque la mini app per tornare alla chat.
+      if (typeof tw.close === "function") {
+        queueMicrotask(() => {
+          try {
+            tw.close();
+          } catch {
+            /* ignore */
+          }
+        });
+      }
     } else {
       window.open(botUrl, "_blank", "noopener,noreferrer");
     }
