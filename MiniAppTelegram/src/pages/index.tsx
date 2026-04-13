@@ -251,6 +251,10 @@ const Index = () => {
       if (startY == null) return;
       const currentY = e.touches[0]?.clientY ?? startY;
       const deltaY = currentY - startY;
+      // Evita il gesture nativo di Telegram (swipe down -> mini app in icona).
+      if (deltaY > 12) {
+        e.preventDefault();
+      }
       if (deltaY < 80) return;
       pullTriggeredRef.current = true;
       void refetchOfferte();
@@ -449,7 +453,8 @@ const Index = () => {
 
               {viewMode === "map" ? (
                 <div
-                  className="lmb-map-viewport-height"
+                  className="lmb-map-viewport-height overscroll-y-contain"
+                  style={{ overscrollBehaviorY: "contain" }}
                   onTouchStart={onMapTouchStart}
                   onTouchMove={onMapTouchMove}
                   onTouchEnd={onMapTouchEnd}
