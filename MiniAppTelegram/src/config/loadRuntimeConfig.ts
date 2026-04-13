@@ -32,9 +32,15 @@ export async function loadPublicRuntimeConfig(): Promise<void> {
         typeof j.publicMiniAppUrl === "string"
           ? j.publicMiniAppUrl.trim()
           : "";
+      const botUserRaw =
+        typeof j.telegramBotUsername === "string"
+          ? j.telegramBotUsername.trim()
+          : "";
+      const botUser = botUserRaw.replace(/^@/, "");
       const next: NonNullable<Window["__LMB_RUNTIME__"]> = {};
       if (base) next.appsScriptWebAppBase = base;
       if (pub) next.publicMiniAppUrl = pub;
+      if (botUser) next.telegramBotUsername = botUser;
       if (Object.keys(next).length > 0) {
         window.__LMB_RUNTIME__ = next;
       }
