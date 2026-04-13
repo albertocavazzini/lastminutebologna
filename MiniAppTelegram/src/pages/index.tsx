@@ -14,7 +14,6 @@ import { useRadarLocation } from "@/features/radar/hooks/useRadarLocation";
 import { useVisibilityPrenotazioniRefresh } from "@/features/radar/hooks/useVisibilityPrenotazioniRefresh";
 import BottomNav from "@/components/BottomNav";
 import DropDetail from "@/components/DropDetail";
-import AlertsView from "@/components/AlertsView";
 import ProfileView from "@/components/ProfileView";
 import PrenotazioniView, {
   type PrenotazioniSubView,
@@ -124,17 +123,6 @@ const Index = () => {
               onRadarTouchMove={onRadarTouchMove}
               onRadarTouchEnd={onRadarTouchEnd}
             />
-          )}
-
-          {activeTab === "alerts" && (
-            <motion.div
-              key="alerts"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <AlertsView />
-            </motion.div>
           )}
 
           {activeTab === "prenotazioni" && (
