@@ -1,14 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Zap,
-  Map,
-  List,
-  MapPin,
-  MessageSquare,
-  Ticket,
-} from "lucide-react";
+import { Zap, Map, List, MapPin, MessageSquare, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Drop } from "@/data/mockDrops";
 import DropCard from "@/components/DropCard";
@@ -168,7 +161,10 @@ const Index = () => {
       if (t == null) return;
       if (Date.now() - t < VISIBILITY_MIN_HIDDEN_MS) return;
       const now = Date.now();
-      if (now - lastVisibilityPrenotazioniRef.current < VISIBILITY_PRENOTAZIONI_COOLDOWN_MS) {
+      if (
+        now - lastVisibilityPrenotazioniRef.current <
+        VISIBILITY_PRENOTAZIONI_COOLDOWN_MS
+      ) {
         return;
       }
       lastVisibilityPrenotazioniRef.current = now;

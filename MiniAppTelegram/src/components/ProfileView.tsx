@@ -54,15 +54,9 @@ const ProfileView = () => {
 
   const botUrl = botUser ? `https://t.me/${botUser}` : "";
   const tw = typeof window !== "undefined" ? window.Telegram?.WebApp : undefined;
-  const canCloseMiniApp = Boolean(tw && typeof tw.close === "function");
-  const canOpenBot = canCloseMiniApp || Boolean(botUrl);
+  const canOpenBot = Boolean(botUrl);
 
   const openBotChat = () => {
-    // In Telegram: chiudere la mini app riporta alla chat sottostante (di solito il bot).
-    if (tw && typeof tw.close === "function") {
-      tw.close();
-      return;
-    }
     if (!botUrl) return;
     if (tw && typeof tw.openTelegramLink === "function") {
       tw.openTelegramLink(botUrl);
@@ -122,17 +116,8 @@ const ProfileView = () => {
           onClick={() => openBotChat()}
         >
           <MessageCircle className="mr-2 h-4 w-4" strokeWidth={1.25} />
-          {canCloseMiniApp ? "Torna al bot (chiudi mini app)" : "Apri chat con il bot"}
+          Apri chat con il bot
         </Button>
-        {canCloseMiniApp && !botUrl ? (
-          <p className="text-xs text-muted-foreground">
-            La mini app si chiude e torni alla chat da cui l’hai aperta (di solito il
-            bot). Se non fosse il bot, configura{" "}
-            <span className="font-mono">VITE_TELEGRAM_BOT_USERNAME</span> o{" "}
-            <span className="font-mono">link_prenota</span> nelle offerte per aprire un
-            link esplicito quando provi fuori da Telegram.
-          </p>
-        ) : null}
         {!canOpenBot ? (
           <p className="text-xs text-amber-800 dark:text-amber-200">
             Non risulta il link al bot: configura{" "}
