@@ -23,11 +23,13 @@ function isDebugHost(): boolean {
 
 function ensureGtagBootstrap(): void {
   window.dataLayer = window.dataLayer || [];
-  window.gtag =
-    window.gtag ||
-    function gtagShim(...args: unknown[]) {
-      window.dataLayer?.push(args);
+  if (typeof window.gtag !== "function") {
+    window.gtag = function gtagQueue() {
+      // Formato richiesto da gtag.js: stesso pattern dello snippet Google (`push(arguments)`).
+      // eslint-disable-next-line prefer-rest-params
+      window.dataLayer!.push(arguments);
     };
+  }
   window.gtag("js", new Date());
 }
 
