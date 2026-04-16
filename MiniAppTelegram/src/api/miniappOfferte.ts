@@ -51,17 +51,39 @@ export function parseTelegramBotUsernameFromTMeLink(
   }
 }
 
-function secondsUntilScadenzaLocale(scadenzaHHmm: string): number {
-  const m = /^(\d{1,2}):(\d{2})$/.exec(String(scadenzaHHmm || "").trim());
-  if (!m) return 3600;
-  const h = parseInt(m[1], 10);
-  const min = parseInt(m[2], 10);
-  if (!Number.isFinite(h) || !Number.isFinite(min)) return 3600;
-  const end = new Date();
-  end.setHours(h, min, 0, 0);
+/** Allineato ad AppScript: {@code dd/MM/yyyy HH:mm:ss} oppure legacy {@code HH:mm} (stesso giorno). */
+function scadenzaOffertaToEndMs(scadenza: string): number | null {
+  const t = String(scadenza || "").trim();
+  const full = /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/.exec(t);
+  if (full) {
+    const day = parseInt(full[1], 10);
+    const month = parseInt(full[2], 10) - 1;
+    const year = parseInt(full[3], 10);
+    const h = parseInt(full[4], 10);
+    const min = parseInt(full[5], 10);
+    const sec = parseInt(full[6], 10);
+    const end = new Date(year, month, day, h, min, sec);
+    const ms = end.getTime();
+    return Number.isFinite(ms) ? ms : null;
+  }
+  const hm = /^(\d{1,2}):(\d{2})$/.exec(t);
+  if (hm) {
+    const h = parseInt(hm[1], 10);
+    const min = parseInt(hm[2], 10);
+    if (!Number.isFinite(h) || !Number.isFinite(min)) return null;
+    const end = new Date();
+    end.setHours(h, min, 0, 0);
+    return end.getTime();
+  }
+  return null;
+}
+
+function secondsUntilScadenzaLocale(scadenza: string): number {
+  const endMs = scadenzaOffertaToEndMs(scadenza);
+  if (endMs == null) return 3600;
   const now = Date.now();
-  if (end.getTime() <= now) return 0;
-  return Math.floor((end.getTime() - now) / 1000);
+  if (endMs <= now) return 0;
+  return Math.floor((endMs - now) / 1000);
 }
 
 export function offertaToDrop(
