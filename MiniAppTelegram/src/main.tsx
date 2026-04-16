@@ -71,11 +71,10 @@ if (!el) {
   throw new Error("Missing #root");
 }
 
-initTelegramWebApp();
-initGa4();
-trackMiniAppLaunch();
-
 void loadPublicRuntimeConfig().then(() => {
+  initTelegramWebApp();
+  initGa4();
+  trackMiniAppLaunch();
   const root = createRoot(el);
   root.render(
     <RootErrorBoundary>
