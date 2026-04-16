@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { loadPublicRuntimeConfig } from "@/config/loadRuntimeConfig";
+import { initGa4, trackMiniAppLaunch } from "@/analytics/ga4";
 import { initTelegramWebApp } from "@/lib/telegramWebApp";
 
 declare global {
@@ -72,6 +73,8 @@ if (!el) {
 
 void loadPublicRuntimeConfig().then(() => {
   initTelegramWebApp();
+  initGa4();
+  trackMiniAppLaunch();
   const root = createRoot(el);
   root.render(
     <RootErrorBoundary>

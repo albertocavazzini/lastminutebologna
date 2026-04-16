@@ -26,35 +26,6 @@
       async
       src="https://www.googletagmanager.com/gtag/js?id=G-HYQ5QKWRP7"
     ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-      gtag("config", "G-HYQ5QKWRP7", { send_page_view: false });
-
-      const tg = window.Telegram?.WebApp;
-      const user = tg?.initDataUnsafe?.user;
-      const isDebugHost =
-        location.hostname === "localhost" || location.hostname === "127.0.0.1";
-
-      if (user?.id) {
-        gtag("config", "G-HYQ5QKWRP7", {
-          user_id: String(user.id),
-          user_properties: {
-            tg_platform: tg?.platform || "unknown",
-          },
-          debug_mode: isDebugHost,
-        });
-      }
-
-      gtag("event", "miniapp_launch", {
-        tg_version: tg?.version || "unknown",
-        tg_platform: tg?.platform || "unknown",
-        debug_mode: isDebugHost,
-      });
-    </script>
   </head>
 
   <body>
