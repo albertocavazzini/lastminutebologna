@@ -23,14 +23,16 @@ function isDebugHost(): boolean {
 
 function ensureGtagBootstrap(): void {
   window.dataLayer = window.dataLayer || [];
-  if (typeof window.gtag !== "function") {
-    window.gtag = function gtagQueue() {
-      // Formato richiesto da gtag.js: stesso pattern dello snippet Google (`push(arguments)`).
-      // eslint-disable-next-line prefer-rest-params
+  // Deve fare push di `arguments`, non di un array da rest: altrimenti gtag.js
+  // non interpreta la coda e non parte nessuna richiesta `collect`.
+  if (!window.gtag) {
+    window.gtag = function gtagShim() {
+      // gtag.js richiede esattamente `push(arguments)`, non un array da `...args`
+      // eslint-disable-next-line prefer-rest-params -- formato ufficiale Google Tag
       window.dataLayer!.push(arguments);
-    };
+    } as Window["gtag"];
   }
-  window.gtag("js", new Date());
+  window.gtag!("js", new Date());
 }
 
 function getTelegramContext() {

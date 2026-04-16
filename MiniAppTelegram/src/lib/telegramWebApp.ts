@@ -21,6 +21,10 @@ export type TelegramWebAppUser = {
 type TelegramWebApp = {
   ready: () => void;
   expand: () => void;
+  /** Es. "7.0" — presente nei client Telegram recenti. */
+  version?: string;
+  /** Es. "ios", "android", "web" — @see Bot API WebApp */
+  platform?: string;
   initData: string;
   initDataUnsafe?: {
     user?: TelegramWebAppUser;
