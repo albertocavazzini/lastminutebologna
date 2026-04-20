@@ -1,9 +1,14 @@
 import { Map, List, MessageSquare, Ticket, Zap } from "lucide-react";
-import { motion } from "framer-motion";
 import type { PrenotazioniSubView } from "@/components/PrenotazioniView";
 import { cn } from "@/lib/utils";
 
-const toggleSpring = { type: "spring" as const, stiffness: 420, damping: 34 };
+/** w-9 + gap-0.5: spostamento pill tra prima e seconda icona */
+const TOGGLE_PILL_SHIFT = "calc(2.25rem + 0.125rem)";
+
+const pillTransition = "transform 300ms cubic-bezier(0.22, 1, 0.36, 1)";
+
+const pillClass =
+  "pointer-events-none absolute inset-y-0.5 left-0.5 w-9 rounded-full bg-primary shadow-sm will-change-transform";
 
 type MainTopBarProps = {
   activeTab: string;
@@ -36,23 +41,20 @@ const MainTopBar = ({
             role="group"
             aria-label="Vista offerte"
           >
-            <motion.div
+            <div
               aria-hidden
-              className="pointer-events-none absolute inset-y-0.5 w-9 rounded-full bg-primary shadow-sm"
-              initial={false}
-              animate={{
-                left:
-                  viewMode === "list"
-                    ? "0.125rem"
-                    : "calc(0.125rem + 2.25rem + 0.125rem)",
+              className={pillClass}
+              style={{
+                transition: pillTransition,
+                transform:
+                  viewMode === "list" ? "translateX(0)" : `translateX(${TOGGLE_PILL_SHIFT})`,
               }}
-              transition={toggleSpring}
             />
             <button
               type="button"
               onClick={() => onChangeViewMode("list")}
               className={cn(
-                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
+                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
                 viewMode === "list"
                   ? "text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -66,7 +68,7 @@ const MainTopBar = ({
               type="button"
               onClick={() => onChangeViewMode("map")}
               className={cn(
-                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
+                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
                 viewMode === "map"
                   ? "text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -85,23 +87,22 @@ const MainTopBar = ({
             role="group"
             aria-label="Sezione prenotazioni"
           >
-            <motion.div
+            <div
               aria-hidden
-              className="pointer-events-none absolute inset-y-0.5 w-9 rounded-full bg-primary shadow-sm"
-              initial={false}
-              animate={{
-                left:
+              className={pillClass}
+              style={{
+                transition: pillTransition,
+                transform:
                   prenotazioniSubView === "lista"
-                    ? "0.125rem"
-                    : "calc(0.125rem + 2.25rem + 0.125rem)",
+                    ? "translateX(0)"
+                    : `translateX(${TOGGLE_PILL_SHIFT})`,
               }}
-              transition={toggleSpring}
             />
             <button
               type="button"
               onClick={() => onChangePrenotazioniSubView("lista")}
               className={cn(
-                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
+                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
                 prenotazioniSubView === "lista"
                   ? "text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -115,7 +116,7 @@ const MainTopBar = ({
               type="button"
               onClick={() => onChangePrenotazioniSubView("feedback")}
               className={cn(
-                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
+                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
                 prenotazioniSubView === "feedback"
                   ? "text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
