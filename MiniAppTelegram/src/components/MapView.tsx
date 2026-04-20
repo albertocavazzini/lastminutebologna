@@ -3,8 +3,8 @@ import {
   Circle,
   CircleMarker,
   MapContainer,
+  Marker,
   TileLayer,
-  Tooltip,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
@@ -46,6 +46,27 @@ type FarCluster = {
 const HOTSPOT_GEOHASH_PRECISION = 5;
 const HOTSPOT_MIN_RADIUS_M = 140;
 const HOTSPOT_MAX_RADIUS_M = 420;
+const HOTSPOT_PRIVACY_OFFSET_M = 180;
+
+function pseudoRandomUnitFromKey(key: string): number {
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash << 5) - hash + key.charCodeAt(i);
+    hash |= 0;
+  }
+  return (Math.abs(hash) % 1000) / 1000;
+}
+
+function offsetLatLngMeters(
+  lat: number,
+  lng: number,
+  distanceM: number,
+  bearingRad: number,
+): [number, number] {
+  const dLat = (distanceM * Math.cos(bearingRad)) / 111_320;
+  const dLng = (distanceM * Math.sin(bearingRad)) / (111_320 * Math.cos((lat * Math.PI) / 180));
+  return [lat + dLat, lng + dLng];
+}
 
 function MapBounds({
   drops,
@@ -132,6 +153,13 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
       });
 
     return kept.map((cluster) => {
+      const angle = 2 * Math.PI * pseudoRandomUnitFromKey(cluster.key);
+      const [displayLat, displayLng] = offsetLatLngMeters(
+        cluster.lat,
+        cluster.lng,
+        HOTSPOT_PRIVACY_OFFSET_M,
+        angle,
+      );
       let nearestM = Number.POSITIVE_INFINITY;
       for (const other of kept) {
         if (other.key === cluster.key) continue;
@@ -145,6 +173,8 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
       );
       return {
         ...cluster,
+        lat: displayLat,
+        lng: displayLng,
         radiusM,
       };
     });
@@ -236,21 +266,30 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
           />
         ))}
         {farClusters.map((cluster) => (
-          <CircleMarker
+          <Marker
             key={`hotspot-count-${cluster.key}`}
-            center={[cluster.lat, cluster.lng]}
-            radius={12}
-            pathOptions={{
-              color: "#ffffff",
-              weight: 2,
-              fillColor: "#3b82f6",
-              fillOpacity: 0.95,
-            }}
-          >
-            <Tooltip permanent direction="center" opacity={1}>
-              <span className="text-[11px] font-semibold text-white">{cluster.count}</span>
-            </Tooltip>
-          </CircleMarker>
+            position={[cluster.lat, cluster.lng]}
+            icon={L.divIcon({
+              className: "lmb-hotspot-badge",
+              iconSize: [28, 28],
+              iconAnchor: [14, 14],
+              html: `<div style="
+                width: 28px;
+                height: 28px;
+                border-radius: 999px;
+                background: #1d4ed8;
+                color: white;
+                border: 2px solid white;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: 700;
+                line-height: 1;
+              ">${cluster.count}</div>`,
+            })}
+          />
         ))}
       </MapContainer>
 
