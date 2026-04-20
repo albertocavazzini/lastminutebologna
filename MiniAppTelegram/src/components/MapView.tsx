@@ -212,7 +212,7 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
       <MapContainer
         center={center}
         zoom={13}
-        className="z-0 h-full w-full [&_.leaflet-control-attribution]:text-[10px]"
+        className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-[10px]"
         scrollWheelZoom
       >
         <TileLayer
@@ -337,13 +337,6 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
               </svg>
             </span>
             <span className="text-muted-foreground">Offerta vicino a te!</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              className="h-3 w-3 rounded-full border-2 border-white shadow-sm"
-              style={{ backgroundColor: "#D4B483" }}
-            />
-            <span className="text-muted-foreground">GoldenDrop</span>
           </div>
           <div className="flex items-center gap-2">
             <span
