@@ -46,9 +46,22 @@ export function useRadarOfferte({
       .sort((a, b) => a.distance - b.distance);
   }, [query.data, userPos]);
 
+  const allDrops = useMemo(() => {
+    const data = query.data;
+    if (!data?.ok || !data.offerte?.length || !userPos) return [];
+    return data.offerte
+      .map((o) => offertaToDrop(o, userPos.lat, userPos.lng))
+      .filter((d) => Number.isFinite(d.lat) && Number.isFinite(d.lng))
+      .sort((a, b) => a.distance - b.distance);
+  }, [query.data, userPos]);
+
+  const radarRangeKm = query.data?.raggio_km ?? RADAR_DEFAULT_KM;
+
   return {
     ...query,
     radarDrops,
+    allDrops,
+    radarRangeKm,
     supportaRadarDataset: Boolean(
       query.data?.ok && query.data.offerte?.length && datasetSupportaRadar(query.data.offerte),
     ),

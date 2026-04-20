@@ -4,10 +4,13 @@ import {
   CircleMarker,
   MapContainer,
   TileLayer,
+  Tooltip,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
 import type { Drop } from "@/data/mockDrops";
+import { encodeGeohash } from "@/lib/geo/geohash";
+import { haversineKm } from "@/lib/geo/distanceKm";
 import type { UserMapPosition } from "@/lib/geo/userMapPosition";
 import "leaflet/dist/leaflet.css";
 
@@ -26,10 +29,23 @@ const TILE_ATTRIBUTION_CARTO =
 
 export interface MapViewProps {
   drops: Drop[];
+  radarRangeKm: number;
   onSelectDrop: (drop: Drop) => void;
   /** Stessa posizione usata per il radar in lista (evita una seconda richiesta GPS). */
   userPos: UserMapPosition | null;
 }
+
+type FarCluster = {
+  key: string;
+  lat: number;
+  lng: number;
+  count: number;
+  radiusM: number;
+};
+
+const HOTSPOT_GEOHASH_PRECISION = 5;
+const HOTSPOT_MIN_RADIUS_M = 140;
+const HOTSPOT_MAX_RADIUS_M = 420;
 
 function MapBounds({
   drops,
@@ -66,7 +82,74 @@ function MapBounds({
   return null;
 }
 
-const MapView = ({ drops, onSelectDrop, userPos }: MapViewProps) => {
+const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) => {
+  const radarRangeM = Math.max(0, Math.round(radarRangeKm * 1000));
+  const nearbyDrops = useMemo(
+    () =>
+      !userPos
+        ? drops
+        : drops.filter((d) => Number.isFinite(d.distance) && d.distance <= radarRangeM),
+    [drops, radarRangeM, userPos],
+  );
+  const farClusters = useMemo<FarCluster[]>(() => {
+    if (!userPos || radarRangeM <= 0) return [];
+    const farDrops = drops.filter(
+      (d) => Number.isFinite(d.distance) && d.distance > radarRangeM,
+    );
+    if (farDrops.length === 0) return [];
+
+    const grouped = new Map<string, { latSum: number; lngSum: number; count: number }>();
+    for (const drop of farDrops) {
+      const key = encodeGeohash(drop.lat, drop.lng, HOTSPOT_GEOHASH_PRECISION);
+      const current = grouped.get(key);
+      if (!current) {
+        grouped.set(key, { latSum: drop.lat, lngSum: drop.lng, count: 1 });
+      } else {
+        current.latSum += drop.lat;
+        current.lngSum += drop.lng;
+        current.count += 1;
+      }
+    }
+
+    const clusters = Array.from(grouped.entries()).map(([key, agg]) => ({
+      key,
+      lat: agg.latSum / agg.count,
+      lng: agg.lngSum / agg.count,
+      count: agg.count,
+    }));
+
+    // Evita sovrapposizioni troppo strette mantenendo i cluster più densi.
+    const kept = clusters
+      .sort((a, b) => b.count - a.count)
+      .filter((candidate, idx, arr) => {
+        for (let i = 0; i < idx; i++) {
+          const keptCluster = arr[i];
+          const dM =
+            haversineKm(candidate.lat, candidate.lng, keptCluster.lat, keptCluster.lng) * 1000;
+          if (dM < HOTSPOT_MIN_RADIUS_M * 2) return false;
+        }
+        return true;
+      });
+
+    return kept.map((cluster) => {
+      let nearestM = Number.POSITIVE_INFINITY;
+      for (const other of kept) {
+        if (other.key === cluster.key) continue;
+        const dM = haversineKm(cluster.lat, cluster.lng, other.lat, other.lng) * 1000;
+        nearestM = Math.min(nearestM, dM);
+      }
+      const antiOverlapLimitM = Number.isFinite(nearestM) ? nearestM * 0.45 : HOTSPOT_MAX_RADIUS_M;
+      const radiusM = Math.max(
+        HOTSPOT_MIN_RADIUS_M,
+        Math.min(HOTSPOT_MAX_RADIUS_M, antiOverlapLimitM),
+      );
+      return {
+        ...cluster,
+        radiusM,
+      };
+    });
+  }, [drops, radarRangeM, userPos]);
+
   const center = useMemo((): [number, number] => {
     if (userPos) return [userPos.lat, userPos.lng];
     if (drops.length > 0) {
@@ -120,7 +203,7 @@ const MapView = ({ drops, onSelectDrop, userPos }: MapViewProps) => {
             }}
           />
         ) : null}
-        {drops.map((drop) => (
+        {nearbyDrops.map((drop) => (
           <CircleMarker
             key={drop.id}
             center={[drop.lat, drop.lng]}
@@ -137,6 +220,37 @@ const MapView = ({ drops, onSelectDrop, userPos }: MapViewProps) => {
               },
             }}
           />
+        ))}
+        {farClusters.map((cluster) => (
+          <Circle
+            key={`hotspot-${cluster.key}`}
+            center={[cluster.lat, cluster.lng]}
+            radius={cluster.radiusM}
+            pathOptions={{
+              color: "#3b82f6",
+              fillColor: "#3b82f6",
+              fillOpacity: 0.16,
+              weight: 1.5,
+              opacity: 0.45,
+            }}
+          />
+        ))}
+        {farClusters.map((cluster) => (
+          <CircleMarker
+            key={`hotspot-count-${cluster.key}`}
+            center={[cluster.lat, cluster.lng]}
+            radius={12}
+            pathOptions={{
+              color: "#ffffff",
+              weight: 2,
+              fillColor: "#3b82f6",
+              fillOpacity: 0.95,
+            }}
+          >
+            <Tooltip permanent direction="center" opacity={1}>
+              <span className="text-[11px] font-semibold text-white">{cluster.count}</span>
+            </Tooltip>
+          </CircleMarker>
         ))}
       </MapContainer>
 
@@ -167,6 +281,13 @@ const MapView = ({ drops, onSelectDrop, userPos }: MapViewProps) => {
               style={{ backgroundColor: "#D4B483" }}
             />
             <span className="text-muted-foreground">GoldenDrop</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span
+              className="h-3 w-3 rounded-full border-2 border-white shadow-sm"
+              style={{ backgroundColor: "#3b82f6" }}
+            />
+            <span className="text-muted-foreground">Fuori raggio (conteggio)</span>
           </div>
           <p className="mt-1 border-t border-border/40 pt-1.5 text-[10px] leading-tight text-muted-foreground/85">
             I punti dei locali seguono lat/long salvate in anagrafica (geocoding

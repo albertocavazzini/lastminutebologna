@@ -18,6 +18,8 @@ type RadarTabContentProps = {
   userPos: UserMapPosition | null;
   data: MiniappOfferteResponse | undefined;
   radarDrops: Drop[];
+  allDrops: Drop[];
+  radarRangeKm: number;
   viewMode: "map" | "list";
   onRequestLocation: () => void;
   onSelectDrop: (drop: Drop) => void;
@@ -36,6 +38,8 @@ const RadarTabContent = ({
   userPos,
   data,
   radarDrops,
+  allDrops,
+  radarRangeKm,
   viewMode,
   onRequestLocation,
   onSelectDrop,
@@ -125,7 +129,12 @@ const RadarTabContent = ({
 
       {viewMode === "map" ? (
         <div className="lmb-map-viewport-height">
-          <MapView drops={radarDrops} onSelectDrop={onSelectDrop} userPos={userPos} />
+          <MapView
+            drops={allDrops}
+            radarRangeKm={radarRangeKm}
+            onSelectDrop={onSelectDrop}
+            userPos={userPos}
+          />
           {userPos && radarDrops.length === 0 && data?.ok && !isPending && (
             <p className="mt-2 text-center text-xs text-muted-foreground">
               Nessuna offerta attiva nel raggio da te in questo momento.
