@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, QrCode, Store } from "lucide-react";
+import { Calendar, QrCode, RefreshCw, Store } from "lucide-react";
 import {
   fetchMiniappPrenotazioniJsonp,
   MINIAPP_PRENOTAZIONI_STALE_MS,
@@ -105,12 +105,17 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
         <Button
           type="button"
           variant="outline"
-          size="sm"
-          className="rounded-lg text-xs"
+          size="icon"
+          className="h-9 w-9 shrink-0 rounded-lg"
           disabled={isFetching}
           onClick={() => refetch()}
+          aria-label={isFetching ? "Aggiornamento in corso" : "Aggiorna prenotazioni"}
         >
-          {isFetching ? "Aggiorno…" : "Aggiorna"}
+          <RefreshCw
+            className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
+            strokeWidth={1.25}
+            aria-hidden
+          />
         </Button>
       </div>
 
