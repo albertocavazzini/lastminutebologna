@@ -221,7 +221,7 @@ const DropDetail = ({
                   onClick={openMapsUrl}
                 >
                   <Navigation className="w-4 h-4 mr-2" strokeWidth={1.25} />
-                  Mappa
+                  Apri in Google Maps
                 </Button>
                 <Button
                   type="button"
