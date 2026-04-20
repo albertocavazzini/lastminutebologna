@@ -10,6 +10,15 @@
 }
 
 /* Zoom +/- coerenti con il bottone "Schermo intero". */
+.lmb-map {
+  --lmb-map-zoom-controls-top: 2.75rem;
+}
+
+.lmb-map .leaflet-top.leaflet-right {
+  top: var(--lmb-map-zoom-controls-top) !important;
+  right: 0.75rem !important;
+}
+
 .lmb-map .leaflet-control-zoom {
   border: 0 !important;
   background: transparent !important;
@@ -252,7 +261,7 @@ main.lmb-main-scroll-pb {
   top: var(--lmb-map-fs-controls-top);
 }
 
-.lmb-map-fullscreen .lmb-map .leaflet-top.leaflet-left {
+.lmb-map-fullscreen .lmb-map .leaflet-top.leaflet-right {
   top: var(--lmb-map-fs-controls-top) !important;
 }
 

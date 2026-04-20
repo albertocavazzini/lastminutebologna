@@ -5,6 +5,7 @@ import {
   MapContainer,
   Marker,
   TileLayer,
+  ZoomControl,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
@@ -214,6 +215,7 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
         zoom={13}
         className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-[10px]"
         scrollWheelZoom
+        zoomControl={false}
       >
         <TileLayer
           attribution={TILE_ATTRIBUTION_CARTO}
@@ -223,6 +225,7 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
           maxNativeZoom={20}
         />
         <MapBounds drops={drops} userPos={userPos} />
+        <ZoomControl position="topright" />
         {userPos && radarRangeM > 0 ? (
           <Circle
             center={[userPos.lat, userPos.lng]}
