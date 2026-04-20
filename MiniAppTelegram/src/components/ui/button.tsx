@@ -20,10 +20,13 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        /** Apple HIG ~44pt min altezza tocco */
+        default: "h-11 min-h-touch px-4 py-2",
+        sm: "h-11 min-h-touch rounded-md px-3",
+        /** Material ~48dp per CTA principali */
+        lg: "h-12 min-h-touch-comfort rounded-md px-8",
+        /** Icon-only: area tocco ~48dp (Material) */
+        icon: "h-12 w-12 min-h-touch-comfort min-w-touch-comfort",
       },
     },
     defaultVariants: {

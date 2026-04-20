@@ -213,7 +213,7 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
       <MapContainer
         center={center}
         zoom={13}
-        className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-[11px]"
+        className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-lmb-label"
         scrollWheelZoom
         zoomControl={false}
         attributionControl={false}
@@ -257,7 +257,9 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
           <Marker
             key={drop.id}
             position={[drop.lat, drop.lng]}
-            icon={nearbyOfferLocationPinIcon(drop.isGolden ? "#D4B483" : "#FF7E5F")}
+            icon={nearbyOfferLocationPinIcon(
+              drop.isGolden ? "#D4B483" : "hsl(11, 100%, 38%)",
+            )}
             eventHandlers={{
               click: () => {
                 onSelectDrop(drop);

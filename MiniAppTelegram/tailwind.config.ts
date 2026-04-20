@@ -14,6 +14,22 @@ export default {
       },
     },
     extend: {
+      /** Allineato a Material Type Scale (body/label/title) + HIG (corpo ~17pt → 16–18px). */
+      fontSize: {
+        "lmb-label": ["0.6875rem", { lineHeight: "1rem", letterSpacing: "0.00625em" }],
+        "lmb-body-sm": ["0.875rem", { lineHeight: "1.25rem", letterSpacing: "0.015625em" }],
+        "lmb-body": ["1rem", { lineHeight: "1.5rem", letterSpacing: "0.009375em" }],
+        "lmb-title-sm": ["1.125rem", { lineHeight: "1.5rem" }],
+        "lmb-title": ["1.375rem", { lineHeight: "1.75rem" }],
+      },
+      minHeight: {
+        touch: "44px",
+        "touch-comfort": "48px",
+      },
+      minWidth: {
+        touch: "44px",
+        "touch-comfort": "48px",
+      },
       fontFamily: {
         sans: [
           "ui-sans-serif",

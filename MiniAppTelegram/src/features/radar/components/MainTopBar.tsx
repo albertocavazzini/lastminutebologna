@@ -2,13 +2,13 @@ import { Map, List, MessageSquare, Ticket, Zap } from "lucide-react";
 import type { PrenotazioniSubView } from "@/components/PrenotazioniView";
 import { cn } from "@/lib/utils";
 
-/** w-9 + gap-0.5: spostamento pill tra prima e seconda icona */
-const TOGGLE_PILL_SHIFT = "calc(2.25rem + 0.125rem)";
+/** w-11 + gap-0.5: spostamento pill tra prima e seconda icona (44px touch) */
+const TOGGLE_PILL_SHIFT = "calc(2.75rem + 0.125rem)";
 
 const pillTransition = "transform 300ms cubic-bezier(0.22, 1, 0.36, 1)";
 
 const pillClass =
-  "pointer-events-none absolute inset-y-0.5 left-0.5 w-9 rounded-full bg-primary shadow-sm will-change-transform";
+  "pointer-events-none absolute inset-y-0.5 left-0.5 w-11 rounded-full bg-primary shadow-sm will-change-transform";
 
 type MainTopBarProps = {
   activeTab: string;
@@ -30,7 +30,7 @@ const MainTopBar = ({
       <div className="flex min-w-0 items-center justify-between gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <Zap className="h-5 w-5 shrink-0 text-primary" strokeWidth={1.25} />
-          <h1 className="truncate text-lg font-bold tracking-tight text-foreground">
+          <h1 className="truncate text-lmb-title-sm font-bold tracking-tight text-foreground">
             LastMinute<span className="text-primary">Bologna</span>
           </h1>
         </div>
@@ -54,7 +54,7 @@ const MainTopBar = ({
               type="button"
               onClick={() => onChangeViewMode("list")}
               className={cn(
-                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
+                "relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
                 viewMode === "list"
                   ? "text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -68,7 +68,7 @@ const MainTopBar = ({
               type="button"
               onClick={() => onChangeViewMode("map")}
               className={cn(
-                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
+                "relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
                 viewMode === "map"
                   ? "text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -102,7 +102,7 @@ const MainTopBar = ({
               type="button"
               onClick={() => onChangePrenotazioniSubView("lista")}
               className={cn(
-                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
+                "relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
                 prenotazioniSubView === "lista"
                   ? "text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -116,7 +116,7 @@ const MainTopBar = ({
               type="button"
               onClick={() => onChangePrenotazioniSubView("feedback")}
               className={cn(
-                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
+                "relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-200",
                 prenotazioniSubView === "feedback"
                   ? "text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",

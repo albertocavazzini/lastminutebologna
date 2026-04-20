@@ -1,6 +1,11 @@
 /**
  * Integrazione Telegram Mini Apps (script caricato da index.html).
  * @see https://core.telegram.org/bots/webapps
+ *
+ * Gesture / scroll: il client Telegram può intercettare swipe verticali (riduzione/chiusura
+ * WebView). Per mappe, scroll interni e pull custom vedi `usePullToRefresh` e commenti in
+ * `index.css`. Opzione API: `WebApp.disableVerticalSwipes()` (Bot API 7.7+) se serve disattivare
+ * lo swipe di sistema; non è abilitata di default per non cambiare il modo in cui l’utente chiude la mini app.
  */
 
 type SafeAreaInset = {

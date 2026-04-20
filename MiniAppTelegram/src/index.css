@@ -9,11 +9,12 @@
 
 /*
  * Zoom +/- sotto il bottone in alto a destra:
- * - mappa normale: top-3 (0.75rem) + h-8 (2rem) = 2.75rem
- * - fullscreen: stessa distanza dal bordo superiore del bottone Chiudi (h-9 = 2.25rem)
+ * - mappa normale: top-3 (0.75rem) + controllo zoom 44px (2.75rem)
+ * - fullscreen: sotto il bottone Chiudi (h-12 ≈ 3rem) + offset in .lmb-map-fullscreen .lmb-map
  */
 .lmb-map {
-  --lmb-map-zoom-controls-top: calc(0.75rem + 2rem);
+  /* top-3 + altezza controllo zoom (44px touch) */
+  --lmb-map-zoom-controls-top: calc(0.75rem + 2.75rem);
 }
 
 .lmb-map .leaflet-top.leaflet-right {
@@ -28,8 +29,8 @@
 }
 
 .lmb-map .leaflet-control-zoom a {
-  width: 32px !important;
-  height: 32px !important;
+  width: 44px !important;
+  height: 44px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -75,6 +76,14 @@
   box-shadow: none !important;
 }
 
+/*
+ * Linee guida UX (riferimento implementazione):
+ * - Tipografia / etichette: Apple HIG Typography, Material 3 Type scale
+ *   → token Tailwind text-lmb-* (tailwind.config.ts)
+ * - Contrasto testo/sfondo: WCAG 2.2 livello AA (testo normale ≥ 4.5:1)
+ * - Aree tocco: Apple ~44pt, Material ~48dp → min-h-touch / Button
+ * - Gesture vs scroll (WebView Telegram): usePullToRefresh.ts + core.telegram.org/bots/webapps
+ */
 @layer base {
   :root {
     /* Cloud White — sezioni, mappa */
@@ -89,15 +98,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 28%;
 
-    /* Flash Orange → mandarino #FF7E5F */
-    --primary: 11 100% 69%;
+    /* Arancio brand: L abbassata per AA con testo bianco su bottone (WCAG 4.5:1) */
+    --primary: 11 100% 38%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 94%;
     --secondary-foreground: 0 0% 28%;
 
     --muted: 0 0% 94%;
-    --muted-foreground: 0 0% 45%;
+    /* Su sfondo 97% L serve ~≤38% per AA su testo secondario piccolo */
+    --muted-foreground: 0 0% 38%;
 
     /* Soft Sand — GoldenDrop #D4B483 */
     --accent: 38 48% 67%;
@@ -112,7 +122,7 @@
 
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 11 100% 69%;
+    --ring: 11 100% 38%;
 
     /* 16px base — card usano rounded-2xl (~24px) */
     --radius: 1rem;
@@ -127,12 +137,12 @@
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 28%;
-    --sidebar-primary: 11 100% 69%;
+    --sidebar-primary: 11 100% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 94%;
     --sidebar-accent-foreground: 0 0% 28%;
     --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 11 100% 69%;
+    --sidebar-ring: 11 100% 38%;
   }
 }
 
@@ -142,7 +152,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    /* Material body large: 16sp / 24 line; WCAG 1.4.8 consiglia interlinea adeguata */
+    @apply bg-background text-foreground font-sans antialiased text-lmb-body;
   }
 }
 
@@ -230,10 +241,10 @@ nav.lmb-nav-safe-pb {
   ) !important;
 }
 
-/* ~3.75rem ≈ barra (min-h-14 + label); allineare se cambi BottomNav. */
+/* ~4.5rem: barra tab Material ~48dp + label + safe area; allineare se cambi BottomNav. */
 main.lmb-main-scroll-pb {
   padding-bottom: calc(
-    3.75rem + max(
+    4.5rem + max(
       env(safe-area-inset-bottom, 0px),
       calc(
         var(--tg-safe-area-inset-bottom, 0px) +
@@ -259,7 +270,8 @@ main.lmb-main-scroll-pb {
 }
 
 .lmb-map-fullscreen .lmb-map {
-  --lmb-map-zoom-controls-top: calc(var(--lmb-map-fs-controls-top) + 2.25rem);
+  /* sotto il bottone Chiudi (h-12 ≈ 48px) */
+  --lmb-map-zoom-controls-top: calc(var(--lmb-map-fs-controls-top) + 3rem);
 }
 
 /* Dettaglio offerta (sheet): spazio sotto per home indicator / gesture bar. */

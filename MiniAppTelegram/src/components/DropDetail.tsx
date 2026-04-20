@@ -128,7 +128,7 @@ const DropDetail = ({
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1 space-y-2">
                     {drop.isGolden ? (
-                      <span className="inline-block rounded-full bg-accent/95 px-2.5 py-1 text-[11px] font-semibold text-accent-foreground shadow-sm">
+                      <span className="inline-block rounded-full bg-accent/95 px-2.5 py-1 text-lmb-label font-semibold text-accent-foreground shadow-sm">
                         ★ GOLDEN DROP
                       </span>
                     ) : null}
@@ -141,7 +141,8 @@ const DropDetail = ({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="shrink-0 rounded-full bg-card/90 p-2 text-foreground shadow-card backdrop-blur-sm border border-border/50"
+                    className="inline-flex h-11 min-h-touch w-11 min-w-touch shrink-0 items-center justify-center rounded-full border border-border/50 bg-card/90 text-foreground shadow-card backdrop-blur-sm"
+                    aria-label="Chiudi"
                   >
                     <X className="h-5 w-5" strokeWidth={1.25} />
                   </button>

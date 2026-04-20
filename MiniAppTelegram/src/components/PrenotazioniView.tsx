@@ -101,12 +101,12 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
   return (
     <div className="space-y-4 pb-8">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-bold text-foreground">Il tuo QR</h2>
+        <h2 className="text-lmb-title font-bold text-foreground">Il tuo QR</h2>
         <Button
           type="button"
           variant="outline"
           size="icon"
-          className="h-9 w-9 shrink-0 rounded-lg"
+          className="shrink-0 rounded-lg"
           disabled={isFetching}
           onClick={() => refetch()}
           aria-label={isFetching ? "Aggiornamento in corso" : "Aggiorna prenotazioni"}
@@ -162,7 +162,7 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
               />
             </div>
             <div className="min-w-0 flex-1 space-y-2">
-              <span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">
+              <span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-lmb-label font-semibold text-primary">
                 Da mostrare al locale
               </span>
               <p className="flex items-center gap-2 text-sm font-semibold text-foreground">

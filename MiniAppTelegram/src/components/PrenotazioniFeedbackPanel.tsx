@@ -82,7 +82,7 @@ function FeedbackCard({
             <Calendar className="h-3.5 w-3.5 shrink-0" strokeWidth={1.25} />
             QR validato il {formatData(oraScansione)}
           </p>
-          <p className="font-mono text-[11px] text-muted-foreground">
+          <p className="font-mono text-lmb-label text-muted-foreground">
             {idPrenotazione}
           </p>
         </div>
@@ -99,7 +99,7 @@ function FeedbackCard({
             key={n}
             type="button"
             onClick={() => setStars(n)}
-            className={`rounded-md p-1 transition-colors ${
+            className={`inline-flex min-h-touch min-w-touch items-center justify-center rounded-md p-2 transition-colors ${
               n <= stars ? "text-amber-400" : "text-muted-foreground/35"
             }`}
             aria-label={`${n} stelle`}
@@ -171,14 +171,14 @@ const PrenotazioniFeedbackPanel = ({
   return (
     <div className="space-y-4 pb-8">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-bold text-foreground">
+        <h2 className="text-lmb-title font-bold text-foreground">
           Valuta l&apos;esperienza
         </h2>
         <Button
           type="button"
           variant="outline"
           size="icon"
-          className="h-9 w-9 shrink-0 rounded-lg"
+          className="shrink-0 rounded-lg"
           disabled={isFetching}
           onClick={() => refetch()}
           aria-label={

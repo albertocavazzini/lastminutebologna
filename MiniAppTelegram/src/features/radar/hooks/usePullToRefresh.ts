@@ -1,5 +1,19 @@
 import { useCallback, useRef, type TouchEvent } from "react";
 
+/**
+ * Pull-to-refresh (solo elenco Offerte) in WebView Telegram.
+ *
+ * Linee guida / contesto:
+ * - Telegram Mini Apps: https://core.telegram.org/bots/webapps — swipe verticali possono
+ *   interagire col client (es. ridurre la mini app). Su iOS/Android il comportamento reale
+ *   varia per versione; qui usiamo `preventDefault` sul pull verso il basso quando l’elenco
+ *   è in cima, per non attivare il gesto nativo e lanciare il refetch.
+ * - Alternativa documentata da Telegram: `WebApp.disableVerticalSwipes()` (Bot API 7.7+), da
+ *   valutare se si vuole disabilitare globalmente la chiusura a swipe (trade-off UX).
+ *
+ * Riferimenti esterni utili: Apple HIG (gesture), Material motion, WCAG (non applicabile al solo
+ * gesto ma al contenuto dopo refresh).
+ */
 const PULL_PREVENT_MIN_DELTA_Y = 12;
 const PULL_TRIGGER_DELTA_Y = 80;
 
