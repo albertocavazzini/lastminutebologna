@@ -269,6 +269,25 @@ main.lmb-main-scroll-pb {
   --lmb-map-zoom-controls-top: calc(var(--lmb-map-fs-controls-top) + 2.25rem);
 }
 
+/* Dettaglio offerta (sheet): spazio sotto per home indicator / gesture bar. */
+.lmb-offer-detail-sheet {
+  padding-bottom: calc(
+    max(
+      env(safe-area-inset-bottom, 0px),
+      calc(
+        var(--tg-safe-area-inset-bottom, 0px) +
+          var(--tg-content-safe-area-inset-bottom, 0px)
+      )
+    ) + 1.25rem
+  );
+}
+
+@media (min-width: 640px) {
+  .lmb-offer-detail-sheet {
+    padding-bottom: 0;
+  }
+}
+
 .lmb-map-viewport-height {
   min-height: 240px;
   height: calc(

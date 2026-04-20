@@ -118,7 +118,7 @@ const DropDetail = ({
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 25 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-md glass-strong rounded-t-3xl sm:rounded-3xl overflow-hidden"
+          className="lmb-offer-detail-sheet w-full max-w-md glass-strong rounded-t-3xl sm:rounded-3xl overflow-hidden"
         >
           {step === "detail" && (
             <div>
