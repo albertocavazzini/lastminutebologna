@@ -109,8 +109,8 @@ const DropDetail = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.18, ease: "easeOut" }}
-        className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-end sm:items-center justify-center"
+        transition={{ duration: 0.12, ease: "easeOut" }}
+        className="fixed inset-0 z-50 flex items-end justify-center bg-background/90 sm:items-center"
         onClick={onClose}
       >
         <motion.div
@@ -119,11 +119,11 @@ const DropDetail = ({
           exit={{ y: "100%" }}
           transition={{
             type: "tween",
-            duration: 0.28,
-            ease: [0.22, 1, 0.36, 1],
+            duration: 0.22,
+            ease: [0.25, 0.1, 0.25, 1],
           }}
           onClick={(e) => e.stopPropagation()}
-          className="lmb-offer-detail-sheet w-full max-w-md glass-strong rounded-t-3xl sm:rounded-3xl overflow-hidden"
+          className="lmb-offer-detail-sheet w-full max-w-md rounded-t-3xl border border-border/60 bg-card shadow-card sm:rounded-3xl overflow-hidden"
         >
           {step === "detail" && (
             <div>
