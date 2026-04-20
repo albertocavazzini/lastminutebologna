@@ -179,7 +179,7 @@ const DropDetail = ({
                       ? `${(drop.distance / 1000).toFixed(1)} km`
                       : `${Math.round(drop.distance)} m`}
                   </p>
-                  <p className="text-xs text-muted-foreground">away</p>
+                  <p className="text-xs text-muted-foreground">circa</p>
                 </div>
                 <div
                   className={`rounded-2xl border border-border/60 bg-secondary/40 p-3 text-center ${isUrgent ? "ring-1 ring-destructive/30" : ""}`}
