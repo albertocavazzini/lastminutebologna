@@ -271,23 +271,65 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
             position={[cluster.lat, cluster.lng]}
             icon={L.divIcon({
               className: "lmb-hotspot-badge",
-              iconSize: [28, 28],
-              iconAnchor: [14, 14],
+              iconSize: [34, 42],
+              iconAnchor: [17, 40],
               html: `<div style="
-                width: 28px;
-                height: 28px;
-                border-radius: 999px;
-                background: #1d4ed8;
-                color: white;
-                border: 2px solid white;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 12px;
-                font-weight: 700;
-                line-height: 1;
-              ">${cluster.count}</div>`,
+                position: relative;
+                width: 34px;
+                height: 42px;
+              ">
+                <div style="
+                  position: absolute;
+                  top: 0;
+                  left: 3px;
+                  width: 28px;
+                  height: 28px;
+                  border-radius: 999px;
+                  background: #1d4ed8;
+                  color: white;
+                  border: 2px solid white;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 12px;
+                  font-weight: 700;
+                  line-height: 1;
+                ">${cluster.count}</div>
+                <div style="
+                  position: absolute;
+                  left: 11px;
+                  top: 21px;
+                  width: 12px;
+                  height: 12px;
+                  background: #1d4ed8;
+                  border-right: 2px solid white;
+                  border-bottom: 2px solid white;
+                  transform: rotate(45deg);
+                  box-shadow: 2px 2px 6px rgba(0,0,0,0.18);
+                "></div>
+                <div style="
+                  position: absolute;
+                  left: 14px;
+                  top: 10px;
+                  width: 6px;
+                  height: 6px;
+                  border-radius: 999px;
+                  background: rgba(255,255,255,0.9);
+                  pointer-events: none;
+                "></div>
+                <div style="
+                  position: absolute;
+                  left: 15px;
+                  bottom: 0;
+                  width: 4px;
+                  height: 4px;
+                  border-radius: 999px;
+                  background: #1d4ed8;
+                  border: 1px solid rgba(255,255,255,0.8);
+                  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+                "></div>
+              </div>`,
             })}
           />
         ))}
