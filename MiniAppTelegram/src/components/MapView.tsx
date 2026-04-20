@@ -216,6 +216,7 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
         className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-[10px]"
         scrollWheelZoom
         zoomControl={false}
+        attributionControl={false}
       >
         <TileLayer
           attribution={TILE_ATTRIBUTION_CARTO}
