@@ -191,16 +191,18 @@ const RadarTabContent = ({
           onTouchEnd={onRadarTouchEnd}
           onTouchCancel={onRadarTouchEnd}
         >
-          <div className="mb-1 flex items-center gap-2">
-            <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
-            <span className="text-xs text-muted-foreground">
-              {!webAppBase
-                ? "Prima configura l'URL della web app (vedi sopra)"
-                : userPos
-                  ? `${radarDrops.length} offerte attive nel tuo raggio`
-                  : "Tocca «Attiva posizione» per l'elenco radar"}
-            </span>
-          </div>
+          {!isPending ? (
+            <div className="mb-1 flex items-center gap-2">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+              <span className="text-xs text-muted-foreground">
+                {!webAppBase
+                  ? "Prima configura l'URL della web app (vedi sopra)"
+                  : userPos
+                    ? `${radarDrops.length} offerte attive nel tuo raggio`
+                    : "Tocca «Attiva posizione» per l'elenco radar"}
+              </span>
+            </div>
+          ) : null}
           {userPos &&
             radarDrops.map((drop, i) => (
               <DropCard
