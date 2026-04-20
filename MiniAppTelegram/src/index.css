@@ -244,7 +244,7 @@ main.lmb-main-scroll-pb {
 .lmb-map-fullscreen {
   --lmb-map-fs-controls-top: calc(
     env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) +
-      var(--tg-content-safe-area-inset-top, 0px) + 0.75rem + 2.25rem
+      var(--tg-content-safe-area-inset-top, 0px) + 0.5rem + 1.75rem
   );
 }
 
