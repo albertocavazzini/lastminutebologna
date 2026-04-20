@@ -36,13 +36,13 @@ const MainTopBar = ({
               if (v === "list" || v === "map") onChangeViewMode(v);
             }}
             aria-label="Vista offerte"
-            className="shrink-0 gap-0.5 rounded-lg border border-border/50 bg-muted/50 p-0.5 shadow-inner"
+            className="shrink-0 gap-0.5 rounded-full border border-border/50 bg-muted/50 p-0.5 shadow-inner"
           >
             <ToggleGroupItem
               value="list"
               aria-label="Elenco offerte"
               className={cn(
-                "h-9 gap-1.5 rounded-md border-0 px-2.5 text-xs font-semibold shadow-none sm:px-3",
+                "h-9 gap-1.5 rounded-full border-0 px-2.5 text-xs font-semibold shadow-none sm:px-3",
                 "data-[state=on]:!bg-primary data-[state=on]:!text-primary-foreground data-[state=on]:hover:!bg-primary/90",
                 "data-[state=off]:text-muted-foreground data-[state=off]:hover:bg-background/70",
               )}
@@ -54,7 +54,7 @@ const MainTopBar = ({
               value="map"
               aria-label="Mappa offerte"
               className={cn(
-                "h-9 gap-1.5 rounded-md border-0 px-2.5 text-xs font-semibold shadow-none sm:px-3",
+                "h-9 gap-1.5 rounded-full border-0 px-2.5 text-xs font-semibold shadow-none sm:px-3",
                 "data-[state=on]:!bg-primary data-[state=on]:!text-primary-foreground data-[state=on]:hover:!bg-primary/90",
                 "data-[state=off]:text-muted-foreground data-[state=off]:hover:bg-background/70",
               )}
@@ -66,11 +66,11 @@ const MainTopBar = ({
         )}
 
         {activeTab === "prenotazioni" && (
-          <div className="flex items-center gap-1 rounded-lg bg-secondary/50 p-0.5">
+          <div className="flex items-center gap-0.5 rounded-full border border-border/50 bg-muted/50 p-0.5 shadow-inner">
             <button
               type="button"
               onClick={() => onChangePrenotazioniSubView("lista")}
-              className={`rounded-md p-1.5 transition-colors ${
+              className={`rounded-full px-2.5 py-1.5 transition-colors ${
                 prenotazioniSubView === "lista"
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground"
@@ -82,7 +82,7 @@ const MainTopBar = ({
             <button
               type="button"
               onClick={() => onChangePrenotazioniSubView("feedback")}
-              className={`rounded-md p-1.5 transition-colors ${
+              className={`rounded-full px-2.5 py-1.5 transition-colors ${
                 prenotazioniSubView === "feedback"
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground"
