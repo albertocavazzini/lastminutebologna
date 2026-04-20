@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Clock, Users } from "lucide-react";
+import { MapPin, Clock, Store, Users } from "lucide-react";
 import type { Drop } from "@/data/mockDrops";
 
 interface DropCardProps {
@@ -67,7 +67,10 @@ const DropCard = ({ drop, index, dataUpdatedAtMs, onSelect }: DropCardProps) => 
               </span>
             ) : null}
             <h3 className="truncate font-semibold text-foreground">{drop.title}</h3>
-            <p className="text-sm text-muted-foreground">{drop.merchant}</p>
+            <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+              <Store className="h-3.5 w-3.5 shrink-0" {...iconThin} />
+              <span className="truncate">{drop.merchant}</span>
+            </p>
           </div>
           <div
             className={`shrink-0 rounded-xl px-2.5 py-1 font-mono text-sm font-bold shadow-sm backdrop-blur-md ${

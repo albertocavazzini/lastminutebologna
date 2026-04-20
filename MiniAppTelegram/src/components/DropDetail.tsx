@@ -9,6 +9,7 @@ import {
   QrCode,
   CheckCircle2,
   Navigation,
+  Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -130,7 +131,10 @@ const DropDetail = ({
                       </span>
                     ) : null}
                     <h2 className="text-xl font-bold text-foreground">{drop.title}</h2>
-                    <p className="text-sm text-muted-foreground">{drop.merchant}</p>
+                    <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+                      <Store className="h-4 w-4 shrink-0" strokeWidth={1.25} />
+                      <span className="truncate">{drop.merchant}</span>
+                    </p>
                   </div>
                   <button
                     type="button"
