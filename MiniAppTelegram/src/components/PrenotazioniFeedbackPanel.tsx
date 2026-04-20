@@ -191,8 +191,8 @@ const PrenotazioniFeedbackPanel = ({
           className="mt-0.5 h-4 w-4 shrink-0"
           strokeWidth={1.25}
         />
-        Compaiono qui le prenotazioni già ritirate (QR validato da almeno 30
-        minuti) per cui non risulta ancora una valutazione salvata.
+        Qui puoi lasciare un feedback ai locali dove hai prenotato. Per noi è
+        molto utile, aiutaci a migliorarci!
       </p>
 
       {isPending && (
@@ -207,8 +207,7 @@ const PrenotazioniFeedbackPanel = ({
 
       {!isPending && data?.ok && list.length === 0 && (
         <p className="rounded-xl border border-border/50 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
-          Nessun feedback in sospeso. Dopo il ritiro, aspetta 30 minuti dalla
-          scansione del QR: poi potrai valutare qui o dal messaggio del bot.
+          Nessun feedback in sospeso.
         </p>
       )}
 
