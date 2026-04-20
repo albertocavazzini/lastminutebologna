@@ -103,41 +103,18 @@ function MapBounds({
   return null;
 }
 
-function nearbyOfferPinIcon(fillColor: string): L.DivIcon {
+/** Pin “posizione” classico (SVG), distinto dai cerchi cluster blu. */
+function nearbyOfferLocationPinIcon(fillColor: string): L.DivIcon {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40" aria-hidden="true">
+    <path d="M15 2C8.92 2 4 6.82 4 12.8c0 7.2 11 21.2 11 21.2s11-14 11-21.2C26 6.82 21.08 2 15 2z"
+      fill="${fillColor}" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="15" cy="13" r="3.2" fill="#ffffff"/>
+  </svg>`;
   return L.divIcon({
     className: "lmb-nearby-offer-pin",
-    iconSize: [24, 34],
-    iconAnchor: [12, 32],
-    html: `<div style="
-      position: relative;
-      width: 24px;
-      height: 34px;
-    ">
-      <div style="
-        position: absolute;
-        left: 2px;
-        top: 0;
-        width: 20px;
-        height: 20px;
-        border-radius: 9999px;
-        background: ${fillColor};
-        border: 2px solid #ffffff;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      "></div>
-      <div style="
-        position: absolute;
-        left: 9px;
-        top: 16px;
-        width: 6px;
-        height: 12px;
-        background: ${fillColor};
-        border-left: 2px solid #ffffff;
-        border-right: 2px solid #ffffff;
-        border-bottom: 2px solid #ffffff;
-        border-bottom-left-radius: 6px;
-        border-bottom-right-radius: 6px;
-      "></div>
-    </div>`,
+    iconSize: [30, 40],
+    iconAnchor: [15, 38],
+    html: svg,
   });
 }
 
@@ -251,12 +228,12 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
             center={[userPos.lat, userPos.lng]}
             radius={radarRangeM}
             pathOptions={{
-              color: "#484848",
-              fillColor: "#484848",
-              fillOpacity: 0.1,
-              weight: 1.2,
-              opacity: 0.55,
-              dashArray: "6 6",
+              color: "#059669",
+              fillColor: "#10b981",
+              fillOpacity: 0.08,
+              weight: 2.5,
+              opacity: 0.85,
+              dashArray: "10 8",
             }}
           />
         ) : null}
@@ -276,7 +253,7 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
           <Marker
             key={drop.id}
             position={[drop.lat, drop.lng]}
-            icon={nearbyOfferPinIcon(drop.isGolden ? "#D4B483" : "#FF7E5F")}
+            icon={nearbyOfferLocationPinIcon(drop.isGolden ? "#D4B483" : "#FF7E5F")}
             eventHandlers={{
               click: () => {
                 onSelectDrop(drop);
@@ -290,11 +267,12 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
             center={[cluster.lat, cluster.lng]}
             radius={cluster.radiusM}
             pathOptions={{
-              color: "#3b82f6",
+              color: "#2563eb",
               fillColor: "#3b82f6",
-              fillOpacity: 0.16,
+              fillOpacity: 0.12,
               weight: 1.5,
-              opacity: 0.45,
+              opacity: 0.55,
+              dashArray: "4 10",
             }}
           />
         ))}
@@ -347,10 +325,17 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
             <span className="text-muted-foreground">Tu</span>
           </div>
           <div className="flex items-center gap-2">
-            <span
-              className="h-3 w-3 rounded-full border-2 border-white shadow-sm"
-              style={{ backgroundColor: "#FF7E5F" }}
-            />
+            <span className="inline-flex h-4 w-3 shrink-0 items-end justify-center pb-0.5">
+              <svg width="12" height="16" viewBox="0 0 30 40" className="drop-shadow-sm">
+                <path
+                  d="M15 2C8.92 2 4 6.82 4 12.8c0 7.2 11 21.2 11 21.2s11-14 11-21.2C26 6.82 21.08 2 15 2z"
+                  fill="#FF7E5F"
+                  stroke="#ffffff"
+                  strokeWidth="2"
+                />
+                <circle cx="15" cy="13" r="3.2" fill="#ffffff" />
+              </svg>
+            </span>
             <span className="text-muted-foreground">Offerta vicino a te!</span>
           </div>
           <div className="flex items-center gap-2">
@@ -362,8 +347,8 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
           </div>
           <div className="flex items-center gap-2">
             <span
-              className="h-3 w-3 rounded-full border-2 border-white shadow-sm"
-              style={{ backgroundColor: "#3b82f6" }}
+              className="h-3 w-5 shrink-0 rounded-sm border border-dashed border-blue-600/70 bg-blue-500/25"
+              title="Area aggregata"
             />
             <span className="text-muted-foreground">Altre offerte attive</span>
           </div>
