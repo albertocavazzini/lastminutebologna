@@ -237,6 +237,20 @@ main.lmb-main-scroll-pb {
   ) !important;
 }
 
+/*
+ * Mappa a schermo intero nella WebView Telegram: padding-top generoso sotto
+ * safe area + barra nativa (chiudi / menu) così zoom +/- e «Chiudi» non si sovrappongono.
+ */
+.lmb-map-fullscreen {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-bottom: 0.75rem;
+  padding-top: calc(
+    env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) +
+      var(--tg-content-safe-area-inset-top, 0px) + 1rem + 2.75rem
+  );
+}
+
 .lmb-map-viewport-height {
   min-height: 240px;
   height: calc(

@@ -157,7 +157,7 @@ const RadarTabContent = ({
             </p>
           )}
           {isMapFullscreen ? (
-            <div className="fixed inset-0 z-[1200] bg-background p-3">
+            <div className="lmb-map-fullscreen fixed inset-0 z-[1200] bg-background">
               <div className="relative h-full w-full">
                 <MapView
                   drops={allDrops}
