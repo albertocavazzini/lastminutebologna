@@ -130,7 +130,9 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
 
       {!isPending && data?.ok && list.length === 0 && (
         <p className="rounded-xl border border-border/50 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
-          Non hai prenotazioni attive. Prenota ora un&apos;offerta dalla sezione Offerte!
+          Non hai prenotazioni attive.
+          <br />
+          Prenota ora un&apos;offerta dalla sezione Offerte!
         </p>
       )}
 
