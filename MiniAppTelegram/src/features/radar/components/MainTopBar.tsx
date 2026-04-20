@@ -42,25 +42,23 @@ const MainTopBar = ({
               value="list"
               aria-label="Elenco offerte"
               className={cn(
-                "h-9 gap-1.5 rounded-full border-0 px-2.5 text-xs font-semibold shadow-none sm:px-3",
+                "h-9 w-9 shrink-0 rounded-full border-0 p-0 shadow-none",
                 "data-[state=on]:!bg-primary data-[state=on]:!text-primary-foreground data-[state=on]:hover:!bg-primary/90",
                 "data-[state=off]:text-muted-foreground data-[state=off]:hover:bg-background/70",
               )}
             >
-              <List className="h-4 w-4 shrink-0" strokeWidth={1.25} />
-              Elenco
+              <List className="h-4 w-4" strokeWidth={1.25} />
             </ToggleGroupItem>
             <ToggleGroupItem
               value="map"
               aria-label="Mappa offerte"
               className={cn(
-                "h-9 gap-1.5 rounded-full border-0 px-2.5 text-xs font-semibold shadow-none sm:px-3",
+                "h-9 w-9 shrink-0 rounded-full border-0 p-0 shadow-none",
                 "data-[state=on]:!bg-primary data-[state=on]:!text-primary-foreground data-[state=on]:hover:!bg-primary/90",
                 "data-[state=off]:text-muted-foreground data-[state=off]:hover:bg-background/70",
               )}
             >
-              <Map className="h-4 w-4 shrink-0" strokeWidth={1.25} />
-              Mappa
+              <Map className="h-4 w-4" strokeWidth={1.25} />
             </ToggleGroupItem>
           </ToggleGroup>
         )}
@@ -70,10 +68,10 @@ const MainTopBar = ({
             <button
               type="button"
               onClick={() => onChangePrenotazioniSubView("lista")}
-              className={`rounded-full px-2.5 py-1.5 transition-colors ${
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
                 prenotazioniSubView === "lista"
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground"
+                  : "text-muted-foreground hover:bg-background/70"
               }`}
               aria-label="Prenotazioni e QR"
             >
@@ -82,10 +80,10 @@ const MainTopBar = ({
             <button
               type="button"
               onClick={() => onChangePrenotazioniSubView("feedback")}
-              className={`rounded-full px-2.5 py-1.5 transition-colors ${
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
                 prenotazioniSubView === "feedback"
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground"
+                  : "text-muted-foreground hover:bg-background/70"
               }`}
               aria-label="Feedback"
             >
