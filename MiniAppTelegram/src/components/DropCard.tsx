@@ -58,41 +58,26 @@ const DropCard = ({ drop, index, dataUpdatedAtMs, onSelect }: DropCardProps) => 
         drop.isGolden ? "ring-1 ring-accent/35" : ""
       } ${isExpiring ? "animate-pulse-urgent" : ""}`}
     >
-      {/* ~60% visivo: area immagine protagonista */}
-      <div className="relative aspect-[5/3] w-full bg-muted">
-        {drop.image ? (
-          <img
-            src={drop.image}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-muted to-muted/60 text-7xl">
-            {drop.merchantLogo}
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none" />
-        {drop.isGolden && (
-          <span className="absolute left-3 top-3 rounded-full bg-accent/95 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-accent-foreground shadow-sm backdrop-blur-sm">
-            ★ GOLDEN DROP
-          </span>
-        )}
-        <div
-          className={`absolute right-3 top-3 rounded-xl px-2.5 py-1 font-mono text-sm font-bold shadow-sm backdrop-blur-md ${
-            drop.isGolden
-              ? "bg-accent/90 text-accent-foreground"
-              : "bg-primary/90 text-primary-foreground"
-          }`}
-        >
-          -{drop.discountPercent}%
-        </div>
-      </div>
-
       <div className="space-y-3 p-4">
-        <div className="min-w-0">
-          <h3 className="truncate font-semibold text-foreground">{drop.title}</h3>
-          <p className="text-sm text-muted-foreground">{drop.merchant}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1 space-y-2">
+            {drop.isGolden ? (
+              <span className="inline-block rounded-full bg-accent/95 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-accent-foreground shadow-sm">
+                ★ GOLDEN DROP
+              </span>
+            ) : null}
+            <h3 className="truncate font-semibold text-foreground">{drop.title}</h3>
+            <p className="text-sm text-muted-foreground">{drop.merchant}</p>
+          </div>
+          <div
+            className={`shrink-0 rounded-xl px-2.5 py-1 font-mono text-sm font-bold shadow-sm backdrop-blur-md ${
+              drop.isGolden
+                ? "bg-accent/90 text-accent-foreground"
+                : "bg-primary/90 text-primary-foreground"
+            }`}
+          >
+            -{drop.discountPercent}%
+          </div>
         </div>
 
         <div className="flex items-end gap-2">

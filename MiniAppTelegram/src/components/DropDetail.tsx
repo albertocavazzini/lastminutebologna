@@ -121,41 +121,28 @@ const DropDetail = ({
         >
           {step === "detail" && (
             <div>
-              <div className="relative aspect-[16/10] w-full bg-muted">
-                {drop.image ? (
-                  <img
-                    src={drop.image}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-7xl">
-                    {drop.merchantLogo}
+              <div className="border-b border-border/50 px-5 pt-4 pb-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1 space-y-2">
+                    {drop.isGolden ? (
+                      <span className="inline-block rounded-full bg-accent/95 px-2.5 py-1 text-[10px] font-semibold text-accent-foreground shadow-sm">
+                        ★ GOLDEN DROP
+                      </span>
+                    ) : null}
+                    <h2 className="text-xl font-bold text-foreground">{drop.title}</h2>
+                    <p className="text-sm text-muted-foreground">{drop.merchant}</p>
                   </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="absolute right-3 top-3 rounded-full bg-card/90 p-2 text-foreground shadow-card backdrop-blur-sm border border-border/50"
-                >
-                  <X className="h-5 w-5" strokeWidth={1.25} />
-                </button>
-                {drop.isGolden && (
-                  <span className="absolute left-3 top-3 rounded-full bg-accent/95 px-2.5 py-1 text-[10px] font-semibold text-accent-foreground shadow-sm">
-                    ★ GOLDEN DROP
-                  </span>
-                )}
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="shrink-0 rounded-full bg-card/90 p-2 text-foreground shadow-card backdrop-blur-sm border border-border/50"
+                  >
+                    <X className="h-5 w-5" strokeWidth={1.25} />
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-5 p-6">
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">
-                    {drop.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">{drop.merchant}</p>
-                </div>
-
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {drop.description}
                 </p>
