@@ -176,7 +176,7 @@ const RadarTabContent = ({
                   onClick={() => setIsMapFullscreen(false)}
                 >
                   <X className="h-4 w-4" />
-                  Chiudi
+                  Chiudi schermo intero
                 </Button>
               </div>
             </div>
