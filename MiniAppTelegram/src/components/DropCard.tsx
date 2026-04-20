@@ -119,7 +119,7 @@ const DropCard = ({ drop, index, dataUpdatedAtMs, onSelect }: DropCardProps) => 
             }`}
           >
             <Users className="h-3.5 w-3.5 shrink-0" {...iconThin} />
-            {drop.quantityLeft} left
+            {drop.quantityLeft} prodotti rimanenti
           </span>
         </div>
       </div>

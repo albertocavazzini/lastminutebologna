@@ -207,7 +207,7 @@ const DropDetail = ({
                   >
                     {drop.quantityLeft}/{drop.quantityTotal}
                   </p>
-                  <p className="text-xs text-muted-foreground">spots left</p>
+                  <p className="text-xs text-muted-foreground">prodotti rimanenti</p>
                 </div>
               </div>
 
