@@ -162,7 +162,7 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
               />
             </div>
             <div className="min-w-0 flex-1 space-y-2">
-              <span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+              <span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">
                 Da mostrare al locale
               </span>
               <p className="flex items-center gap-2 text-sm font-semibold text-foreground">

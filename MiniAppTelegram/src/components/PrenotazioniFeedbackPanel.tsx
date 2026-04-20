@@ -82,7 +82,7 @@ function FeedbackCard({
             <Calendar className="h-3.5 w-3.5 shrink-0" strokeWidth={1.25} />
             QR validato il {formatData(oraScansione)}
           </p>
-          <p className="font-mono text-[10px] text-muted-foreground">
+          <p className="font-mono text-[11px] text-muted-foreground">
             {idPrenotazione}
           </p>
         </div>

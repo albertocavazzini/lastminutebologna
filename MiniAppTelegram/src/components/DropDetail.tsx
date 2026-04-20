@@ -128,7 +128,7 @@ const DropDetail = ({
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1 space-y-2">
                     {drop.isGolden ? (
-                      <span className="inline-block rounded-full bg-accent/95 px-2.5 py-1 text-[10px] font-semibold text-accent-foreground shadow-sm">
+                      <span className="inline-block rounded-full bg-accent/95 px-2.5 py-1 text-[11px] font-semibold text-accent-foreground shadow-sm">
                         ★ GOLDEN DROP
                       </span>
                     ) : null}

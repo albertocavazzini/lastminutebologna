@@ -213,7 +213,7 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
       <MapContainer
         center={center}
         zoom={13}
-        className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-[10px]"
+        className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-[11px]"
         scrollWheelZoom
         zoomControl={false}
         attributionControl={false}

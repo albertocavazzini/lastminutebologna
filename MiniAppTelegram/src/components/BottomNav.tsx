@@ -29,7 +29,7 @@ const BottomNav = ({ active, onNavigate }: BottomNavProps) => {
               }`}
             >
               <tab.icon className="w-5 h-5" strokeWidth={isActive ? 2 : 1.25} />
-              <span className="text-[10px] font-medium">{tab.label}</span>
+              <span className="text-[11px] font-medium leading-tight">{tab.label}</span>
               {isActive && (
                 <div className="absolute bottom-0.5 h-1 w-6 rounded-full bg-primary/90" />
               )}
