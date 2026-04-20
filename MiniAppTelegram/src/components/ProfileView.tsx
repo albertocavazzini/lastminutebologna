@@ -44,6 +44,8 @@ const ProfileView = () => {
   const tgUser = getTelegramWebAppUser();
   const displayName = tgUser ? formatTelegramDisplayName(tgUser) : null;
   const username = tgUser?.username?.replace(/^@/, "").trim();
+  const profileHeading =
+    tgUser != null ? (username ? `@${username}` : (displayName ?? "Profilo")) : "Profilo";
 
   const botUser = useMemo(() => {
     const configured = projectEnv.telegramBotUsername;
@@ -76,34 +78,20 @@ const ProfileView = () => {
         animate={{ opacity: 1, y: 0 }}
         className="glass rounded-2xl p-5 shadow-card"
       >
-        <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
-          <User className="h-4 w-4 text-primary" strokeWidth={1.25} />
-          Chi sei
+        <div className="flex items-center gap-2 text-lg font-bold text-foreground">
+          <User className="h-5 w-5 shrink-0 text-primary" strokeWidth={1.25} />
+          <span className="min-w-0 truncate">{profileHeading}</span>
         </div>
 
-        {tgUser ? (
-          <div className="space-y-2">
-            <p className="text-lg font-bold text-foreground">{displayName}</p>
-            {username ? (
-              <p className="text-sm text-muted-foreground">
-                @{username}
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Nessuno username pubblico su Telegram: va bene lo stesso per
-                prenotazioni e QR.
-              </p>
-            )}
-          </div>
-        ) : (
-          <p className="text-sm leading-relaxed text-muted-foreground">
+        {!tgUser ? (
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             Apri questa pagina come{" "}
             <strong className="text-foreground">mini app da Telegram</strong>{" "}
             (dal menu del bot o dal pulsante con link alla web app): così
             vediamo nome e username per personalizzare l’esperienza. Fuori da
             Telegram i dati utente non sono disponibili.
           </p>
-        )}
+        ) : null}
       </motion.div>
 
       <motion.div
@@ -112,7 +100,6 @@ const ProfileView = () => {
         transition={{ delay: 0.05 }}
         className="space-y-3"
       >
-        <p className="text-sm font-semibold text-foreground">Azioni rapide</p>
         <Button
           type="button"
           className="w-full rounded-xl font-semibold"
@@ -140,9 +127,7 @@ const ProfileView = () => {
         transition={{ delay: 0.1 }}
         className="glass rounded-2xl p-5 shadow-card"
       >
-        <p className="mb-3 text-sm font-semibold text-foreground">
-          FAQ breve
-        </p>
+        <p className="mb-3 text-sm font-semibold text-foreground">FAQ</p>
         <ul className="space-y-4">
           {FAQ_SUPPORT.map((item) => (
             <li key={item.q} className="border-b border-border/40 pb-3 last:border-0 last:pb-0">
