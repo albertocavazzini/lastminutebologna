@@ -233,7 +233,7 @@ const DropDetail = ({
                   }`}
                 >
                   <QrCode className="w-4 h-4 mr-2" strokeWidth={1.25} />
-                  {drop.linkPrenota ? "Prenota nel bot" : "Book & Pay"}
+                  {drop.linkPrenota ? "Prenota" : "Book & Pay"}
                 </Button>
               </div>
               </div>
