@@ -1,7 +1,9 @@
 import { Map, List, MessageSquare, Ticket, Zap } from "lucide-react";
+import { motion } from "framer-motion";
 import type { PrenotazioniSubView } from "@/components/PrenotazioniView";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
+
+const toggleSpring = { type: "spring" as const, stiffness: 420, damping: 34 };
 
 type MainTopBarProps = {
   activeTab: string;
@@ -29,63 +31,97 @@ const MainTopBar = ({
         </div>
 
         {activeTab === "radar" && (
-          <ToggleGroup
-            type="single"
-            value={viewMode}
-            onValueChange={(v) => {
-              if (v === "list" || v === "map") onChangeViewMode(v);
-            }}
+          <div
+            className="relative flex shrink-0 gap-0.5 rounded-full border border-border/50 bg-muted/50 p-0.5 shadow-inner"
+            role="group"
             aria-label="Vista offerte"
-            className="shrink-0 gap-0.5 rounded-full border border-border/50 bg-muted/50 p-0.5 shadow-inner"
           >
-            <ToggleGroupItem
-              value="list"
-              aria-label="Elenco offerte"
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0.5 w-9 rounded-full bg-primary shadow-sm"
+              initial={false}
+              animate={{
+                left:
+                  viewMode === "list"
+                    ? "0.125rem"
+                    : "calc(0.125rem + 2.25rem + 0.125rem)",
+              }}
+              transition={toggleSpring}
+            />
+            <button
+              type="button"
+              onClick={() => onChangeViewMode("list")}
               className={cn(
-                "h-9 w-9 shrink-0 rounded-full border-0 p-0 shadow-none",
-                "data-[state=on]:!bg-primary data-[state=on]:!text-primary-foreground data-[state=on]:hover:!bg-primary/90",
-                "data-[state=off]:text-muted-foreground data-[state=off]:hover:bg-background/70",
+                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
+                viewMode === "list"
+                  ? "text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
+              aria-label="Elenco offerte"
+              aria-pressed={viewMode === "list"}
             >
               <List className="h-4 w-4" strokeWidth={1.25} />
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="map"
-              aria-label="Mappa offerte"
+            </button>
+            <button
+              type="button"
+              onClick={() => onChangeViewMode("map")}
               className={cn(
-                "h-9 w-9 shrink-0 rounded-full border-0 p-0 shadow-none",
-                "data-[state=on]:!bg-primary data-[state=on]:!text-primary-foreground data-[state=on]:hover:!bg-primary/90",
-                "data-[state=off]:text-muted-foreground data-[state=off]:hover:bg-background/70",
+                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
+                viewMode === "map"
+                  ? "text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
+              aria-label="Mappa offerte"
+              aria-pressed={viewMode === "map"}
             >
               <Map className="h-4 w-4" strokeWidth={1.25} />
-            </ToggleGroupItem>
-          </ToggleGroup>
+            </button>
+          </div>
         )}
 
         {activeTab === "prenotazioni" && (
-          <div className="flex items-center gap-0.5 rounded-full border border-border/50 bg-muted/50 p-0.5 shadow-inner">
+          <div
+            className="relative flex shrink-0 items-center gap-0.5 rounded-full border border-border/50 bg-muted/50 p-0.5 shadow-inner"
+            role="group"
+            aria-label="Sezione prenotazioni"
+          >
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0.5 w-9 rounded-full bg-primary shadow-sm"
+              initial={false}
+              animate={{
+                left:
+                  prenotazioniSubView === "lista"
+                    ? "0.125rem"
+                    : "calc(0.125rem + 2.25rem + 0.125rem)",
+              }}
+              transition={toggleSpring}
+            />
             <button
               type="button"
               onClick={() => onChangePrenotazioniSubView("lista")}
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
+              className={cn(
+                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
                 prenotazioniSubView === "lista"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-background/70"
-              }`}
+                  ? "text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
               aria-label="Prenotazioni e QR"
+              aria-pressed={prenotazioniSubView === "lista"}
             >
               <Ticket className="h-4 w-4" strokeWidth={1.25} />
             </button>
             <button
               type="button"
               onClick={() => onChangePrenotazioniSubView("feedback")}
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
+              className={cn(
+                "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors",
                 prenotazioniSubView === "feedback"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-background/70"
-              }`}
+                  ? "text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
               aria-label="Feedback"
+              aria-pressed={prenotazioniSubView === "feedback"}
             >
               <MessageSquare className="h-4 w-4" strokeWidth={1.25} />
             </button>
