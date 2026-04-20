@@ -1,6 +1,6 @@
-import type { TouchEventHandler } from "react";
+import { useState, type TouchEventHandler } from "react";
 import { motion } from "framer-motion";
-import { MapPin } from "lucide-react";
+import { Expand, MapPin, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DropCard from "@/components/DropCard";
 import MapView from "@/components/MapView";
@@ -20,6 +20,7 @@ type RadarTabContentProps = {
   radarDrops: Drop[];
   allDrops: Drop[];
   radarRangeKm: number;
+  dataUpdatedAtMs: number;
   viewMode: "map" | "list";
   onRequestLocation: () => void;
   onSelectDrop: (drop: Drop) => void;
@@ -40,6 +41,7 @@ const RadarTabContent = ({
   radarDrops,
   allDrops,
   radarRangeKm,
+  dataUpdatedAtMs,
   viewMode,
   onRequestLocation,
   onSelectDrop,
@@ -47,6 +49,8 @@ const RadarTabContent = ({
   onRadarTouchMove,
   onRadarTouchEnd,
 }: RadarTabContentProps) => {
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+
   return (
     <motion.div key="radar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       {!webAppBase && (
@@ -129,17 +133,54 @@ const RadarTabContent = ({
 
       {viewMode === "map" ? (
         <div className="lmb-map-viewport-height">
-          <MapView
-            drops={allDrops}
-            radarRangeKm={radarRangeKm}
-            onSelectDrop={onSelectDrop}
-            userPos={userPos}
-          />
+          <div className="relative h-full w-full">
+            <MapView
+              drops={allDrops}
+              radarRangeKm={radarRangeKm}
+              onSelectDrop={onSelectDrop}
+              userPos={userPos}
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="pointer-events-auto absolute right-3 top-3 z-[600] h-8 rounded-full px-2.5"
+              onClick={() => setIsMapFullscreen(true)}
+            >
+              <Expand className="h-4 w-4" />
+              Schermo intero
+            </Button>
+          </div>
           {userPos && radarDrops.length === 0 && data?.ok && !isPending && (
             <p className="mt-2 text-center text-xs text-muted-foreground">
               Nessuna offerta attiva nel raggio da te in questo momento.
             </p>
           )}
+          {isMapFullscreen ? (
+            <div className="fixed inset-0 z-[1200] bg-background p-3">
+              <div className="relative h-full w-full">
+                <MapView
+                  drops={allDrops}
+                  radarRangeKm={radarRangeKm}
+                  onSelectDrop={(drop) => {
+                    onSelectDrop(drop);
+                    setIsMapFullscreen(false);
+                  }}
+                  userPos={userPos}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  className="pointer-events-auto absolute right-3 top-3 z-[1300] h-9 rounded-full px-3"
+                  onClick={() => setIsMapFullscreen(false)}
+                >
+                  <X className="h-4 w-4" />
+                  Chiudi
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : (
         <div
@@ -162,7 +203,13 @@ const RadarTabContent = ({
           </div>
           {userPos &&
             radarDrops.map((drop, i) => (
-              <DropCard key={drop.id} drop={drop} index={i} onSelect={onSelectDrop} />
+              <DropCard
+                key={drop.id}
+                drop={drop}
+                index={i}
+                dataUpdatedAtMs={dataUpdatedAtMs}
+                onSelect={onSelectDrop}
+              />
             ))}
         </div>
       )}

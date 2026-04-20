@@ -51,6 +51,7 @@ const Index = () => {
     radarDrops,
     allDrops,
     radarRangeKm,
+    dataUpdatedAtMs,
     isPending,
     isError,
     error,
@@ -120,6 +121,7 @@ const Index = () => {
               radarDrops={radarDrops}
               allDrops={allDrops}
               radarRangeKm={radarRangeKm}
+              dataUpdatedAtMs={dataUpdatedAtMs}
               viewMode={viewMode}
               onRequestLocation={requestLocation}
               onSelectDrop={setSelectedDrop}

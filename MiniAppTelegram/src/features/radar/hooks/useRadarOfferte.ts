@@ -62,6 +62,7 @@ export function useRadarOfferte({
     radarDrops,
     allDrops,
     radarRangeKm,
+    dataUpdatedAtMs: query.dataUpdatedAt,
     supportaRadarDataset: Boolean(
       query.data?.ok && query.data.offerte?.length && datasetSupportaRadar(query.data.offerte),
     ),

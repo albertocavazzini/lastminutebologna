@@ -103,6 +103,44 @@ function MapBounds({
   return null;
 }
 
+function nearbyOfferPinIcon(fillColor: string): L.DivIcon {
+  return L.divIcon({
+    className: "lmb-nearby-offer-pin",
+    iconSize: [24, 34],
+    iconAnchor: [12, 32],
+    html: `<div style="
+      position: relative;
+      width: 24px;
+      height: 34px;
+    ">
+      <div style="
+        position: absolute;
+        left: 2px;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 9999px;
+        background: ${fillColor};
+        border: 2px solid #ffffff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      "></div>
+      <div style="
+        position: absolute;
+        left: 9px;
+        top: 16px;
+        width: 6px;
+        height: 12px;
+        background: ${fillColor};
+        border-left: 2px solid #ffffff;
+        border-right: 2px solid #ffffff;
+        border-bottom: 2px solid #ffffff;
+        border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;
+      "></div>
+    </div>`,
+  });
+}
+
 const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) => {
   const radarRangeM = Math.max(0, Math.round(radarRangeKm * 1000));
   const nearbyDrops = useMemo(
@@ -208,16 +246,17 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
           maxNativeZoom={20}
         />
         <MapBounds drops={drops} userPos={userPos} />
-        {userPos && userPos.accuracyM != null && userPos.accuracyM > 0 ? (
+        {userPos && radarRangeM > 0 ? (
           <Circle
             center={[userPos.lat, userPos.lng]}
-            radius={Math.min(userPos.accuracyM, 1500)}
+            radius={radarRangeM}
             pathOptions={{
               color: "#484848",
               fillColor: "#484848",
-              fillOpacity: 0.14,
-              weight: 1,
-              opacity: 0.5,
+              fillOpacity: 0.1,
+              weight: 1.2,
+              opacity: 0.55,
+              dashArray: "6 6",
             }}
           />
         ) : null}
@@ -234,16 +273,10 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
           />
         ) : null}
         {nearbyDrops.map((drop) => (
-          <CircleMarker
+          <Marker
             key={drop.id}
-            center={[drop.lat, drop.lng]}
-            radius={9}
-            pathOptions={{
-              color: "#ffffff",
-              weight: 2,
-              fillColor: drop.isGolden ? "#D4B483" : "#FF7E5F",
-              fillOpacity: 1,
-            }}
+            position={[drop.lat, drop.lng]}
+            icon={nearbyOfferPinIcon(drop.isGolden ? "#D4B483" : "#FF7E5F")}
             eventHandlers={{
               click: () => {
                 onSelectDrop(drop);
@@ -271,19 +304,19 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
             position={[cluster.lat, cluster.lng]}
             icon={L.divIcon({
               className: "lmb-hotspot-badge",
-              iconSize: [40, 28],
-              iconAnchor: [20, 14],
+              iconSize: [44, 32],
+              iconAnchor: [22, 16],
               html: `<div style="
                 position: relative;
-                width: 40px;
-                height: 28px;
+                width: 44px;
+                height: 32px;
               ">
                 <div style="
                   position: absolute;
                   top: 0;
                   left: 0;
-                  width: 40px;
-                  height: 28px;
+                  width: 44px;
+                  height: 32px;
                   border-radius: 9999px;
                   background: #1d4ed8;
                   color: white;
@@ -292,7 +325,7 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                  font-size: 14px;
+                  font-size: 18px;
                   font-weight: 700;
                   line-height: 1;
                 ">

@@ -6,6 +6,8 @@ import type { Drop } from "@/data/mockDrops";
 interface DropCardProps {
   drop: Drop;
   index: number;
+  /** Timestamp (ms) di ultimo aggiornamento dataset offerte da React Query. */
+  dataUpdatedAtMs: number;
   onSelect: (drop: Drop) => void;
 }
 
@@ -23,18 +25,28 @@ function formatDistanceMeters(meters: number): string {
 
 const iconThin = { strokeWidth: 1.25 } as const;
 
-const DropCard = ({ drop, index, onSelect }: DropCardProps) => {
-  const [remaining, setRemaining] = useState(drop.remainingSeconds);
+const DropCard = ({ drop, index, dataUpdatedAtMs, onSelect }: DropCardProps) => {
+  const computeRemaining = () => {
+    const base = Number.isFinite(drop.remainingSeconds) ? drop.remainingSeconds : 0;
+    const ageSec = Math.max(0, Math.floor((Date.now() - dataUpdatedAtMs) / 1000));
+    return Math.max(0, base - ageSec);
+  };
+  const [remaining, setRemaining] = useState(computeRemaining);
   const isUrgent = remaining < 300;
   const isExpiring = remaining < 180;
   const spotsComfortable = drop.quantityLeft > 2;
+
+  useEffect(() => {
+    setRemaining(computeRemaining());
+    // Riesegue quando cambia card o nuovo dataset dal server.
+  }, [drop.id, drop.remainingSeconds, dataUpdatedAtMs]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setRemaining((prev) => Math.max(0, prev - 1));
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [drop.id]);
 
   return (
     <motion.div
