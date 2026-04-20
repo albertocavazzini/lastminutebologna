@@ -9,9 +9,13 @@
   max-width: none !important;
 }
 
-/* Zoom +/- coerenti con il bottone "Schermo intero". */
+/*
+ * Zoom +/- sotto il bottone in alto a destra:
+ * - mappa normale: top-3 (0.75rem) + h-8 (2rem) = 2.75rem
+ * - fullscreen: stessa distanza dal bordo superiore del bottone Chiudi (h-9 = 2.25rem)
+ */
 .lmb-map {
-  --lmb-map-zoom-controls-top: 2.75rem;
+  --lmb-map-zoom-controls-top: calc(0.75rem + 2rem);
 }
 
 .lmb-map .leaflet-top.leaflet-right {
@@ -261,8 +265,8 @@ main.lmb-main-scroll-pb {
   top: var(--lmb-map-fs-controls-top);
 }
 
-.lmb-map-fullscreen .lmb-map .leaflet-top.leaflet-right {
-  top: var(--lmb-map-fs-controls-top) !important;
+.lmb-map-fullscreen .lmb-map {
+  --lmb-map-zoom-controls-top: calc(var(--lmb-map-fs-controls-top) + 2.25rem);
 }
 
 .lmb-map-viewport-height {
