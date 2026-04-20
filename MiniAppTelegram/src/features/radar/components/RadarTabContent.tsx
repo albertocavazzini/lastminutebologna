@@ -172,7 +172,7 @@ const RadarTabContent = ({
                   type="button"
                   size="sm"
                   variant="secondary"
-                  className="pointer-events-auto absolute right-3 top-3 z-[1300] h-9 rounded-full px-3"
+                  className="lmb-map-fullscreen-close pointer-events-auto absolute right-3 z-[1300] h-9 rounded-full px-3"
                   onClick={() => setIsMapFullscreen(false)}
                 >
                   <X className="h-4 w-4" />
