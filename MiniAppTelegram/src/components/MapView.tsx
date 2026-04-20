@@ -291,14 +291,11 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
                   box-shadow: 0 2px 8px rgba(0,0,0,0.25);
                   display: flex;
                   align-items: center;
-                  justify-content: space-between;
-                  gap: 4px;
-                  padding: 0 8px 0 7px;
-                  font-size: 11px;
+                  justify-content: center;
+                  font-size: 14px;
                   font-weight: 700;
                   line-height: 1;
                 ">
-                  <span style="font-size: 12px; line-height: 1;">📍</span>
                   <span>${cluster.count}</span>
                 </div>
               </div>`,
@@ -316,17 +313,12 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
             />
             <span className="text-muted-foreground">Tu</span>
           </div>
-          {userPos?.accuracyM != null && userPos.accuracyM > 0 ? (
-            <p className="pl-5 text-[10px] leading-tight text-muted-foreground/90">
-              Cerchio ≈ incertezza GPS (~{userPos.accuracyM}&nbsp;m)
-            </p>
-          ) : null}
           <div className="flex items-center gap-2">
             <span
               className="h-3 w-3 rounded-full border-2 border-white shadow-sm"
               style={{ backgroundColor: "#FF7E5F" }}
             />
-            <span className="text-muted-foreground">Offerta</span>
+            <span className="text-muted-foreground">Offerta vicino a te!</span>
           </div>
           <div className="flex items-center gap-2">
             <span
@@ -340,12 +332,8 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
               className="h-3 w-3 rounded-full border-2 border-white shadow-sm"
               style={{ backgroundColor: "#3b82f6" }}
             />
-            <span className="text-muted-foreground">Fuori raggio (conteggio)</span>
+            <span className="text-muted-foreground">Altre offerte attive</span>
           </div>
-          <p className="mt-1 border-t border-border/40 pt-1.5 text-[10px] leading-tight text-muted-foreground/85">
-            I punti dei locali seguono lat/long salvate in anagrafica (geocoding
-            o mappa usata in inserimento).
-          </p>
         </div>
       </div>
     </div>
