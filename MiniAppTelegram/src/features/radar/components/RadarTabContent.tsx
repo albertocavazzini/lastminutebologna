@@ -163,32 +163,30 @@ const RadarTabContent = ({
 
       {viewMode === "map" ? (
         <div className="lmb-map-viewport-height">
-          <div className="relative h-full w-full">
-            <MapView
-              drops={allDrops}
-              radarRangeKm={radarRangeKm}
-              onSelectDrop={onSelectDrop}
-              userPos={userPos}
-              onZoomLevelChange={onCompactMapZoomLevelChange}
-              onViewChange={onCompactMapViewChange}
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              className="pointer-events-auto absolute right-3 top-3 z-[600] rounded-full px-2.5"
-              onClick={() => onMapFullscreenChange(true)}
-            >
-              <Expand className="h-4 w-4" />
-              Schermo intero
-            </Button>
-          </div>
-          {userPos && radarDrops.length === 0 && data?.ok && !isPending && (
-            <p className="mt-2 text-center text-xs text-muted-foreground">
-              Nessuna offerta attiva nel raggio da te in questo momento.
-            </p>
-          )}
-          {isMapFullscreen ? (
+          {!isMapFullscreen ? (
+            <div className="relative h-full w-full">
+              <MapView
+                drops={allDrops}
+                radarRangeKm={radarRangeKm}
+                onSelectDrop={onSelectDrop}
+                userPos={userPos}
+                onZoomLevelChange={onCompactMapZoomLevelChange}
+                onViewChange={onCompactMapViewChange}
+                initialView={compactMapView}
+                autoFitOnMount={!compactMapView}
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="pointer-events-auto absolute right-3 top-3 z-[600] rounded-full px-2.5"
+                onClick={() => onMapFullscreenChange(true)}
+              >
+                <Expand className="h-4 w-4" />
+                Schermo intero
+              </Button>
+            </div>
+          ) : (
             <div className="lmb-map-fullscreen fixed inset-0 z-[1200] bg-background">
               <div className="relative h-full w-full">
                 <MapView
@@ -199,6 +197,8 @@ const RadarTabContent = ({
                     onMapFullscreenChange(false);
                   }}
                   userPos={userPos}
+                  onZoomLevelChange={onCompactMapZoomLevelChange}
+                  onViewChange={onCompactMapViewChange}
                   initialView={compactMapView}
                   autoFitOnMount={false}
                 />
@@ -214,7 +214,12 @@ const RadarTabContent = ({
                 </Button>
               </div>
             </div>
-          ) : null}
+          )}
+          {userPos && radarDrops.length === 0 && data?.ok && !isPending && (
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Nessuna offerta attiva nel raggio da te in questo momento.
+            </p>
+          )}
         </div>
       ) : (
         <div
