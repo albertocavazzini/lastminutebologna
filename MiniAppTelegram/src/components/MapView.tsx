@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   Circle,
   CircleMarker,
@@ -81,8 +81,20 @@ function MapBounds({
   userPos: UserMapPosition | null;
 }) {
   const map = useMap();
+  const hasAutoFittedRef = useRef(false);
+  const lastUserPosKeyRef = useRef<string>("");
 
   useEffect(() => {
+    const userPosKey = userPos ? `${userPos.lat.toFixed(6)}:${userPos.lng.toFixed(6)}` : "";
+    if (userPosKey !== lastUserPosKeyRef.current) {
+      hasAutoFittedRef.current = false;
+      lastUserPosKeyRef.current = userPosKey;
+    }
+  }, [userPos]);
+
+  useEffect(() => {
+    if (hasAutoFittedRef.current) return;
+
     const points: L.LatLngExpression[] = drops.map((d) => [d.lat, d.lng]);
     if (userPos) {
       points.push([userPos.lat, userPos.lng]);
@@ -90,12 +102,14 @@ function MapBounds({
 
     if (points.length === 0) {
       map.setView(BOLOGNA_CENTER, 12);
+      hasAutoFittedRef.current = true;
       return;
     }
 
     if (points.length === 1) {
       const p = points[0] as [number, number];
       map.setView(p, 17);
+      hasAutoFittedRef.current = true;
       return;
     }
 
@@ -103,6 +117,7 @@ function MapBounds({
       padding: [48, 48],
       maxZoom: 18,
     });
+    hasAutoFittedRef.current = true;
   }, [map, drops, userPos]);
 
   return null;
