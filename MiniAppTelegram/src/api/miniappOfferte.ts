@@ -26,6 +26,7 @@ export type MiniappOfferteResponse = {
   offerte?: MiniappOffertaApi[];
   raggio_km?: number;
   geo_precisione?: number;
+  scope?: "all" | "radar" | string;
 };
 
 export const MINIAPP_OFFERTE_QUERY_ROOT = "miniapp-offerte" as const;
@@ -163,7 +164,14 @@ export function datasetSupportaRadar(offerte: MiniappOffertaApi[]): boolean {
 /**
  * JSONP verso la web app (stesso contratto di MiniAppTelegram/app.js).
  */
-export function fetchMiniappOfferteJsonp(baseRaw: string): Promise<MiniappOfferteResponse> {
+export function fetchMiniappOfferteJsonp(
+  baseRaw: string,
+  opts?: {
+    scope?: "all" | "radar";
+    userLat?: number | null;
+    userLng?: number | null;
+  },
+): Promise<MiniappOfferteResponse> {
   const base = baseRaw.replace(/\/$/, "");
   if (!base) {
     return Promise.reject(new Error("Base URL web app mancante."));
@@ -197,6 +205,16 @@ export function fetchMiniappOfferteJsonp(baseRaw: string): Promise<MiniappOffert
     }
     url.searchParams.set("mode", "api_miniapp");
     url.searchParams.set("action", "offerte");
+    const scope = opts?.scope ?? "all";
+    url.searchParams.set("scope", scope);
+    if (
+      scope === "radar" &&
+      Number.isFinite(opts?.userLat) &&
+      Number.isFinite(opts?.userLng)
+    ) {
+      url.searchParams.set("user_lat", String(opts?.userLat));
+      url.searchParams.set("user_lng", String(opts?.userLng));
+    }
     url.searchParams.set("callback", cbName);
 
     script.src = url.toString();

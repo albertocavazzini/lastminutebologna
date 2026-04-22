@@ -25,6 +25,7 @@ const Index = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("radar");
   const [viewMode, setViewMode] = useState<"map" | "list">("list");
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [prenotazioniSubView, setPrenotazioniSubView] =
     useState<PrenotazioniSubView>("lista");
   const [selectedDrop, setSelectedDrop] = useState<Drop | null>(null);
@@ -44,6 +45,12 @@ const Index = () => {
     handleViewModeChange(activeTab, viewMode);
   }, [activeTab, viewMode, handleViewModeChange]);
 
+  useEffect(() => {
+    if (activeTab !== "radar" || viewMode !== "map") {
+      setIsMapFullscreen(false);
+    }
+  }, [activeTab, viewMode]);
+
   useVisibilityPrenotazioniRefresh(queryClient);
 
   const {
@@ -60,6 +67,8 @@ const Index = () => {
     webAppBase,
     activeTab,
     userPos,
+    viewMode,
+    isMapFullscreen,
   });
 
   const { data: prenotazioniData } = useQuery({
@@ -128,6 +137,8 @@ const Index = () => {
               onRadarTouchStart={onRadarTouchStart}
               onRadarTouchMove={onRadarTouchMove}
               onRadarTouchEnd={onRadarTouchEnd}
+              isMapFullscreen={isMapFullscreen}
+              onMapFullscreenChange={setIsMapFullscreen}
             />
           )}
 

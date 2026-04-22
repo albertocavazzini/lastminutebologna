@@ -1,4 +1,4 @@
-import { useState, type TouchEventHandler } from "react";
+import type { TouchEventHandler } from "react";
 import { motion } from "framer-motion";
 import { Expand, MapPin, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ type RadarTabContentProps = {
   onRadarTouchStart: TouchEventHandler<HTMLDivElement>;
   onRadarTouchMove: TouchEventHandler<HTMLDivElement>;
   onRadarTouchEnd: TouchEventHandler<HTMLDivElement>;
+  isMapFullscreen: boolean;
+  onMapFullscreenChange: (next: boolean) => void;
 };
 
 const RadarTabContent = ({
@@ -48,9 +50,9 @@ const RadarTabContent = ({
   onRadarTouchStart,
   onRadarTouchMove,
   onRadarTouchEnd,
+  isMapFullscreen,
+  onMapFullscreenChange,
 }: RadarTabContentProps) => {
-  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
-
   return (
     <motion.div key="radar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       {!webAppBase && (
@@ -145,7 +147,7 @@ const RadarTabContent = ({
               size="sm"
               variant="secondary"
               className="pointer-events-auto absolute right-3 top-3 z-[600] rounded-full px-2.5"
-              onClick={() => setIsMapFullscreen(true)}
+              onClick={() => onMapFullscreenChange(true)}
             >
               <Expand className="h-4 w-4" />
               Schermo intero
@@ -164,7 +166,7 @@ const RadarTabContent = ({
                   radarRangeKm={radarRangeKm}
                   onSelectDrop={(drop) => {
                     onSelectDrop(drop);
-                    setIsMapFullscreen(false);
+                    onMapFullscreenChange(false);
                   }}
                   userPos={userPos}
                 />
@@ -173,7 +175,7 @@ const RadarTabContent = ({
                   size="lg"
                   variant="secondary"
                   className="lmb-map-fullscreen-close pointer-events-auto absolute right-3 z-[1300] rounded-full px-3"
-                  onClick={() => setIsMapFullscreen(false)}
+                  onClick={() => onMapFullscreenChange(false)}
                 >
                   <X className="h-4 w-4" />
                   Chiudi schermo intero

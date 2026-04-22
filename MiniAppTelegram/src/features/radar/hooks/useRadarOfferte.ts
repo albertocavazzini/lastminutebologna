@@ -16,14 +16,30 @@ export function useRadarOfferte({
   webAppBase,
   activeTab,
   userPos,
+  viewMode,
+  isMapFullscreen,
 }: {
   webAppBase: string;
   activeTab: string;
   userPos: UserMapPosition | null;
+  viewMode: "map" | "list";
+  isMapFullscreen: boolean;
 }) {
+  const mapCompactRadarScope =
+    activeTab === "radar" &&
+    viewMode === "map" &&
+    !isMapFullscreen &&
+    Boolean(userPos);
+  const scope: "all" | "radar" = mapCompactRadarScope ? "radar" : "all";
+
   const query = useQuery({
-    queryKey: ["miniapp-offerte", webAppBase],
-    queryFn: () => fetchMiniappOfferteJsonp(webAppBase),
+    queryKey: ["miniapp-offerte", webAppBase, scope, userPos?.lat ?? null, userPos?.lng ?? null],
+    queryFn: () =>
+      fetchMiniappOfferteJsonp(webAppBase, {
+        scope,
+        userLat: userPos?.lat ?? null,
+        userLng: userPos?.lng ?? null,
+      }),
     staleTime: 60_000,
     enabled: Boolean(webAppBase),
     refetchInterval: activeTab === "radar" ? RADAR_OFFERTE_REFETCH_MS : false,
