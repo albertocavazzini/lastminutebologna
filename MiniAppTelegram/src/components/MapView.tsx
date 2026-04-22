@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import {
   Circle,
-  CircleMarker,
   MapContainer,
   Marker,
   TileLayer,
@@ -223,6 +222,21 @@ function nearbyOfferLocationPinIcon(fillColor: string): L.DivIcon {
   });
 }
 
+const USER_POSITION_DOT_ICON = L.divIcon({
+  className: "lmb-user-position-dot",
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+  html: `<span style="
+    display:block;
+    width:14px;
+    height:14px;
+    border-radius:9999px;
+    border:2px solid #ffffff;
+    background:#484848;
+    box-sizing:border-box;
+  "></span>`,
+});
+
 const MapView = ({
   drops,
   radarRangeKm,
@@ -376,16 +390,7 @@ const MapView = ({
           />
         ) : null}
         {userPos ? (
-          <CircleMarker
-            center={[userPos.lat, userPos.lng]}
-            radius={7}
-            pathOptions={{
-              color: "#ffffff",
-              weight: 2,
-              fillColor: "#484848",
-              fillOpacity: 1,
-            }}
-          />
+          <Marker position={[userPos.lat, userPos.lng]} icon={USER_POSITION_DOT_ICON} />
         ) : null}
         {nearbyDrops.map((drop) => (
           <Marker
