@@ -36,6 +36,9 @@ export interface MapViewProps {
   /** Stessa posizione usata per il radar in lista (evita una seconda richiesta GPS). */
   userPos: UserMapPosition | null;
   onZoomLevelChange?: (zoom: number) => void;
+  onViewChange?: (view: { centerLat: number; centerLng: number; zoom: number }) => void;
+  initialView?: { centerLat: number; centerLng: number; zoom: number } | null;
+  autoFitOnMount?: boolean;
 }
 
 type FarCluster = {
@@ -76,9 +79,11 @@ function offsetLatLngMeters(
 function MapBounds({
   drops,
   userPos,
+  autoFitOnMount = true,
 }: {
   drops: Drop[];
   userPos: UserMapPosition | null;
+  autoFitOnMount?: boolean;
 }) {
   const map = useMap();
   const hasAutoFittedRef = useRef(false);
@@ -93,6 +98,7 @@ function MapBounds({
   }, [userPos]);
 
   useEffect(() => {
+    if (!autoFitOnMount) return;
     if (hasAutoFittedRef.current) return;
 
     const points: L.LatLngExpression[] = drops.map((d) => [d.lat, d.lng]);
@@ -118,25 +124,35 @@ function MapBounds({
       maxZoom: 18,
     });
     hasAutoFittedRef.current = true;
-  }, [map, drops, userPos]);
+  }, [map, drops, userPos, autoFitOnMount]);
 
   return null;
 }
 
 function MapZoomListener({
   onZoomLevelChange,
+  onViewChange,
 }: {
   onZoomLevelChange?: (zoom: number) => void;
+  onViewChange?: (view: { centerLat: number; centerLng: number; zoom: number }) => void;
 }) {
   const map = useMapEvents({
     zoomend: () => {
       onZoomLevelChange?.(map.getZoom());
+      const c = map.getCenter();
+      onViewChange?.({ centerLat: c.lat, centerLng: c.lng, zoom: map.getZoom() });
+    },
+    moveend: () => {
+      const c = map.getCenter();
+      onViewChange?.({ centerLat: c.lat, centerLng: c.lng, zoom: map.getZoom() });
     },
   });
 
   useEffect(() => {
     onZoomLevelChange?.(map.getZoom());
-  }, [map, onZoomLevelChange]);
+    const c = map.getCenter();
+    onViewChange?.({ centerLat: c.lat, centerLng: c.lng, zoom: map.getZoom() });
+  }, [map, onZoomLevelChange, onViewChange]);
 
   return null;
 }
@@ -162,6 +178,9 @@ const MapView = ({
   onSelectDrop,
   userPos,
   onZoomLevelChange,
+  onViewChange,
+  initialView,
+  autoFitOnMount = true,
 }: MapViewProps) => {
   const radarRangeM = Math.max(0, Math.round(radarRangeKm * 1000));
   const nearbyDrops = useMemo(
@@ -253,6 +272,7 @@ const MapView = ({
   }, [drops, radarRangeM, userPos]);
 
   const center = useMemo((): [number, number] => {
+    if (initialView) return [initialView.centerLat, initialView.centerLng];
     if (userPos) return [userPos.lat, userPos.lng];
     if (drops.length > 0) {
       const sum = drops.reduce(
@@ -262,13 +282,14 @@ const MapView = ({
       return [sum.lat / drops.length, sum.lng / drops.length];
     }
     return BOLOGNA_CENTER;
-  }, [userPos, drops]);
+  }, [initialView, userPos, drops]);
+  const initialZoom = initialView?.zoom ?? 13;
 
   return (
     <div className="relative h-full w-full overflow-hidden rounded-2xl border border-border/40 shadow-inner">
       <MapContainer
         center={center}
-        zoom={13}
+        zoom={initialZoom}
         className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-lmb-label"
         scrollWheelZoom
         zoomControl={false}
@@ -281,8 +302,8 @@ const MapView = ({
           maxZoom={20}
           maxNativeZoom={20}
         />
-        <MapBounds drops={drops} userPos={userPos} />
-        <MapZoomListener onZoomLevelChange={onZoomLevelChange} />
+        <MapBounds drops={drops} userPos={userPos} autoFitOnMount={autoFitOnMount} />
+        <MapZoomListener onZoomLevelChange={onZoomLevelChange} onViewChange={onViewChange} />
         <ZoomControl position="topright" />
         {userPos && radarRangeM > 0 ? (
           <Circle

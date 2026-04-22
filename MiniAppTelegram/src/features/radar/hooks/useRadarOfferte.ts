@@ -18,20 +18,20 @@ export function useRadarOfferte({
   userPos,
   viewMode,
   isMapFullscreen,
-  isMapZoomedIn,
+  isMapZoomedOut,
 }: {
   webAppBase: string;
   activeTab: string;
   userPos: UserMapPosition | null;
   viewMode: "map" | "list";
   isMapFullscreen: boolean;
-  isMapZoomedIn: boolean;
+  isMapZoomedOut: boolean;
 }) {
   const mapCompactRadarScope =
     activeTab === "radar" &&
     viewMode === "map" &&
     !isMapFullscreen &&
-    !isMapZoomedIn &&
+    !isMapZoomedOut &&
     Boolean(userPos);
   const scope: "all" | "radar" = mapCompactRadarScope ? "radar" : "all";
 

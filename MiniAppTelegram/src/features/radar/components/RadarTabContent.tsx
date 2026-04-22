@@ -33,6 +33,8 @@ type RadarTabContentProps = {
   isMapFullscreen: boolean;
   onMapFullscreenChange: (next: boolean) => void;
   onCompactMapZoomLevelChange: (zoom: number) => void;
+  onCompactMapViewChange: (view: { centerLat: number; centerLng: number; zoom: number }) => void;
+  compactMapView: { centerLat: number; centerLng: number; zoom: number } | null;
 };
 
 const RadarTabContent = ({
@@ -57,6 +59,8 @@ const RadarTabContent = ({
   isMapFullscreen,
   onMapFullscreenChange,
   onCompactMapZoomLevelChange,
+  onCompactMapViewChange,
+  compactMapView,
 }: RadarTabContentProps) => {
   return (
     <motion.div
@@ -166,6 +170,7 @@ const RadarTabContent = ({
               onSelectDrop={onSelectDrop}
               userPos={userPos}
               onZoomLevelChange={onCompactMapZoomLevelChange}
+              onViewChange={onCompactMapViewChange}
             />
             <Button
               type="button"
@@ -194,6 +199,8 @@ const RadarTabContent = ({
                     onMapFullscreenChange(false);
                   }}
                   userPos={userPos}
+                  initialView={compactMapView}
+                  autoFitOnMount={false}
                 />
                 <Button
                   type="button"

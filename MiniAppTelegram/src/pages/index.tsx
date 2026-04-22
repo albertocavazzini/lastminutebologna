@@ -22,12 +22,17 @@ import MainTopBar from "@/features/radar/components/MainTopBar";
 import RadarTabContent from "@/features/radar/components/RadarTabContent";
 
 const Index = () => {
-  const MAP_ZOOM_FULL_SCOPE_THRESHOLD = 14;
+  const MAP_ZOOM_FULL_SCOPE_THRESHOLD = 12;
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("radar");
   const [viewMode, setViewMode] = useState<"map" | "list">("list");
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
-  const [isMapZoomedIn, setIsMapZoomedIn] = useState(false);
+  const [isMapZoomedOut, setIsMapZoomedOut] = useState(false);
+  const [compactMapView, setCompactMapView] = useState<{
+    centerLat: number;
+    centerLng: number;
+    zoom: number;
+  } | null>(null);
   const [prenotazioniSubView, setPrenotazioniSubView] =
     useState<PrenotazioniSubView>("lista");
   const [selectedDrop, setSelectedDrop] = useState<Drop | null>(null);
@@ -50,7 +55,7 @@ const Index = () => {
   useEffect(() => {
     if (activeTab !== "radar" || viewMode !== "map") {
       setIsMapFullscreen(false);
-      setIsMapZoomedIn(false);
+      setIsMapZoomedOut(false);
     }
   }, [activeTab, viewMode]);
 
@@ -72,7 +77,7 @@ const Index = () => {
     userPos,
     viewMode,
     isMapFullscreen,
-    isMapZoomedIn,
+    isMapZoomedOut,
   });
 
   const { data: prenotazioniData } = useQuery({
@@ -144,8 +149,10 @@ const Index = () => {
               isMapFullscreen={isMapFullscreen}
               onMapFullscreenChange={setIsMapFullscreen}
               onCompactMapZoomLevelChange={(zoom) =>
-                setIsMapZoomedIn(zoom >= MAP_ZOOM_FULL_SCOPE_THRESHOLD)
+                setIsMapZoomedOut(zoom <= MAP_ZOOM_FULL_SCOPE_THRESHOLD)
               }
+              onCompactMapViewChange={setCompactMapView}
+              compactMapView={compactMapView}
             />
           )}
 
