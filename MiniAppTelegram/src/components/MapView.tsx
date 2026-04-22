@@ -248,6 +248,7 @@ const MapView = ({
   autoFitOnMount = true,
 }: MapViewProps) => {
   const radarRangeM = Math.max(0, Math.round(radarRangeKm * 1000));
+  const stableCircleRenderer = useMemo(() => L.canvas({ padding: 0.5 }), []);
   const nearbyDrops = useMemo(
     () =>
       !userPos
@@ -379,6 +380,7 @@ const MapView = ({
           <Circle
             center={[userPos.lat, userPos.lng]}
             radius={radarRangeM}
+            renderer={stableCircleRenderer}
             pathOptions={{
               color: "#059669",
               fillColor: "#10b981",
