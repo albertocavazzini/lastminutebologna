@@ -22,10 +22,12 @@ import MainTopBar from "@/features/radar/components/MainTopBar";
 import RadarTabContent from "@/features/radar/components/RadarTabContent";
 
 const Index = () => {
+  const MAP_ZOOM_FULL_SCOPE_THRESHOLD = 14;
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("radar");
   const [viewMode, setViewMode] = useState<"map" | "list">("list");
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const [isMapZoomedIn, setIsMapZoomedIn] = useState(false);
   const [prenotazioniSubView, setPrenotazioniSubView] =
     useState<PrenotazioniSubView>("lista");
   const [selectedDrop, setSelectedDrop] = useState<Drop | null>(null);
@@ -48,6 +50,7 @@ const Index = () => {
   useEffect(() => {
     if (activeTab !== "radar" || viewMode !== "map") {
       setIsMapFullscreen(false);
+      setIsMapZoomedIn(false);
     }
   }, [activeTab, viewMode]);
 
@@ -69,6 +72,7 @@ const Index = () => {
     userPos,
     viewMode,
     isMapFullscreen,
+    isMapZoomedIn,
   });
 
   const { data: prenotazioniData } = useQuery({
@@ -139,6 +143,9 @@ const Index = () => {
               onRadarTouchEnd={onRadarTouchEnd}
               isMapFullscreen={isMapFullscreen}
               onMapFullscreenChange={setIsMapFullscreen}
+              onCompactMapZoomLevelChange={(zoom) =>
+                setIsMapZoomedIn(zoom >= MAP_ZOOM_FULL_SCOPE_THRESHOLD)
+              }
             />
           )}
 

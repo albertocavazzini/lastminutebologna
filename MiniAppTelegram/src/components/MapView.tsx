@@ -7,6 +7,7 @@ import {
   TileLayer,
   ZoomControl,
   useMap,
+  useMapEvents,
 } from "react-leaflet";
 import L from "leaflet";
 import type { Drop } from "@/data/mockDrops";
@@ -34,6 +35,7 @@ export interface MapViewProps {
   onSelectDrop: (drop: Drop) => void;
   /** Stessa posizione usata per il radar in lista (evita una seconda richiesta GPS). */
   userPos: UserMapPosition | null;
+  onZoomLevelChange?: (zoom: number) => void;
 }
 
 type FarCluster = {
@@ -65,7 +67,9 @@ function offsetLatLngMeters(
   bearingRad: number,
 ): [number, number] {
   const dLat = (distanceM * Math.cos(bearingRad)) / 111_320;
-  const dLng = (distanceM * Math.sin(bearingRad)) / (111_320 * Math.cos((lat * Math.PI) / 180));
+  const dLng =
+    (distanceM * Math.sin(bearingRad)) /
+    (111_320 * Math.cos((lat * Math.PI) / 180));
   return [lat + dLat, lng + dLng];
 }
 
@@ -104,6 +108,24 @@ function MapBounds({
   return null;
 }
 
+function MapZoomListener({
+  onZoomLevelChange,
+}: {
+  onZoomLevelChange?: (zoom: number) => void;
+}) {
+  const map = useMapEvents({
+    zoomend: () => {
+      onZoomLevelChange?.(map.getZoom());
+    },
+  });
+
+  useEffect(() => {
+    onZoomLevelChange?.(map.getZoom());
+  }, [map, onZoomLevelChange]);
+
+  return null;
+}
+
 /** Pin “posizione” classico (SVG), distinto dai cerchi cluster blu. */
 function nearbyOfferLocationPinIcon(fillColor: string): L.DivIcon {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40" aria-hidden="true">
@@ -119,13 +141,21 @@ function nearbyOfferLocationPinIcon(fillColor: string): L.DivIcon {
   });
 }
 
-const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) => {
+const MapView = ({
+  drops,
+  radarRangeKm,
+  onSelectDrop,
+  userPos,
+  onZoomLevelChange,
+}: MapViewProps) => {
   const radarRangeM = Math.max(0, Math.round(radarRangeKm * 1000));
   const nearbyDrops = useMemo(
     () =>
       !userPos
         ? drops
-        : drops.filter((d) => Number.isFinite(d.distance) && d.distance <= radarRangeM),
+        : drops.filter(
+            (d) => Number.isFinite(d.distance) && d.distance <= radarRangeM,
+          ),
     [drops, radarRangeM, userPos],
   );
   const farClusters = useMemo<FarCluster[]>(() => {
@@ -135,7 +165,10 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
     );
     if (farDrops.length === 0) return [];
 
-    const grouped = new Map<string, { latSum: number; lngSum: number; count: number }>();
+    const grouped = new Map<
+      string,
+      { latSum: number; lngSum: number; count: number }
+    >();
     for (const drop of farDrops) {
       const key = encodeGeohash(drop.lat, drop.lng, HOTSPOT_GEOHASH_PRECISION);
       const current = grouped.get(key);
@@ -162,7 +195,12 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
         for (let i = 0; i < idx; i++) {
           const keptCluster = arr[i];
           const dM =
-            haversineKm(candidate.lat, candidate.lng, keptCluster.lat, keptCluster.lng) * 1000;
+            haversineKm(
+              candidate.lat,
+              candidate.lng,
+              keptCluster.lat,
+              keptCluster.lng,
+            ) * 1000;
           if (dM < HOTSPOT_MIN_RADIUS_M * 2) return false;
         }
         return true;
@@ -179,10 +217,13 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
       let nearestM = Number.POSITIVE_INFINITY;
       for (const other of kept) {
         if (other.key === cluster.key) continue;
-        const dM = haversineKm(cluster.lat, cluster.lng, other.lat, other.lng) * 1000;
+        const dM =
+          haversineKm(cluster.lat, cluster.lng, other.lat, other.lng) * 1000;
         nearestM = Math.min(nearestM, dM);
       }
-      const antiOverlapLimitM = Number.isFinite(nearestM) ? nearestM * 0.45 : HOTSPOT_MAX_RADIUS_M;
+      const antiOverlapLimitM = Number.isFinite(nearestM)
+        ? nearestM * 0.45
+        : HOTSPOT_MAX_RADIUS_M;
       const radiusM = Math.max(
         HOTSPOT_MIN_RADIUS_M,
         Math.min(HOTSPOT_MAX_RADIUS_M, antiOverlapLimitM),
@@ -226,6 +267,7 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
           maxNativeZoom={20}
         />
         <MapBounds drops={drops} userPos={userPos} />
+        <MapZoomListener onZoomLevelChange={onZoomLevelChange} />
         <ZoomControl position="topright" />
         {userPos && radarRangeM > 0 ? (
           <Circle
@@ -332,7 +374,12 @@ const MapView = ({ drops, radarRangeKm, onSelectDrop, userPos }: MapViewProps) =
           </div>
           <div className="flex items-center gap-2">
             <span className="inline-flex h-4 w-3 shrink-0 items-end justify-center pb-0.5">
-              <svg width="12" height="16" viewBox="0 0 30 40" className="drop-shadow-sm">
+              <svg
+                width="12"
+                height="16"
+                viewBox="0 0 30 40"
+                className="drop-shadow-sm"
+              >
                 <path
                   d="M15 2C8.92 2 4 6.82 4 12.8c0 7.2 11 21.2 11 21.2s11-14 11-21.2C26 6.82 21.08 2 15 2z"
                   fill="#FF7E5F"

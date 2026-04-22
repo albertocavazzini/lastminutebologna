@@ -4,7 +4,10 @@ import { Expand, MapPin, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DropCard from "@/components/DropCard";
 import MapView from "@/components/MapView";
-import { datasetSupportaRadar, type MiniappOfferteResponse } from "@/api/miniappOfferte";
+import {
+  datasetSupportaRadar,
+  type MiniappOfferteResponse,
+} from "@/api/miniappOfferte";
 import type { Drop } from "@/data/mockDrops";
 import type { UserMapPosition } from "@/lib/geo/userMapPosition";
 
@@ -29,6 +32,7 @@ type RadarTabContentProps = {
   onRadarTouchEnd: TouchEventHandler<HTMLDivElement>;
   isMapFullscreen: boolean;
   onMapFullscreenChange: (next: boolean) => void;
+  onCompactMapZoomLevelChange: (zoom: number) => void;
 };
 
 const RadarTabContent = ({
@@ -52,22 +56,37 @@ const RadarTabContent = ({
   onRadarTouchEnd,
   isMapFullscreen,
   onMapFullscreenChange,
+  onCompactMapZoomLevelChange,
 }: RadarTabContentProps) => {
   return (
-    <motion.div key="radar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+    <motion.div
+      key="radar"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
       {!webAppBase && (
         <div className="mb-3 space-y-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-3 text-xs leading-relaxed text-amber-900 dark:text-amber-100">
           <p>
-            <strong className="text-foreground">URL web app mancante.</strong> Apri{" "}
-            <span className="font-mono">MiniAppTelegram/public/runtime-config.json</span>, metti il
-            tuo link <span className="font-mono">https://script.google.com/macros/s/…/exec</span>{" "}
-            in <span className="font-mono">appsScriptWebAppBase</span>, poi commit e push.
+            <strong className="text-foreground">URL web app mancante.</strong>{" "}
+            Apri{" "}
+            <span className="font-mono">
+              MiniAppTelegram/public/runtime-config.json
+            </span>
+            , metti il tuo link{" "}
+            <span className="font-mono">
+              https://script.google.com/macros/s/…/exec
+            </span>{" "}
+            in <span className="font-mono">appsScriptWebAppBase</span>, poi
+            commit e push.
           </p>
           <p className="text-[11px] opacity-90">
-            Prova rapida senza commit: aggiungi alla fine dell&apos;indirizzo della mini app{" "}
-            <span className="font-mono">#exec=</span> più l&apos;URL codificato con{" "}
-            <span className="font-mono">encodeURIComponent</span> (anche da console browser). Oppure{" "}
-            <span className="font-mono">.env</span> / secret GitHub{" "}
+            Prova rapida senza commit: aggiungi alla fine dell&apos;indirizzo
+            della mini app <span className="font-mono">#exec=</span> più
+            l&apos;URL codificato con{" "}
+            <span className="font-mono">encodeURIComponent</span> (anche da
+            console browser). Oppure <span className="font-mono">.env</span> /
+            secret GitHub{" "}
             <span className="font-mono">VITE_APPS_SCRIPT_WEBAPP_BASE</span>.
           </p>
         </div>
@@ -88,15 +107,17 @@ const RadarTabContent = ({
           <p className="text-xs text-muted-foreground">
             {geoDenied ? (
               <>
-                <strong className="text-foreground">Posizione bloccata.</strong> Su iPhone/Android
-                apri le impostazioni di sistema per Telegram e consenti la posizione, oppure tocca
-                di nuovo qui sotto dopo averlo abilitato.
+                <strong className="text-foreground">Posizione bloccata.</strong>{" "}
+                Su iPhone/Android apri le impostazioni di sistema per Telegram e
+                consenti la posizione, oppure tocca di nuovo qui sotto dopo
+                averlo abilitato.
               </>
             ) : (
               <>
-                Su <strong className="text-foreground">Telegram</strong> il GPS spesso parte solo
-                dopo un <strong className="text-foreground">tocco</strong>. Serve per il radar
-                (geohash + distanza come sul bot).
+                Su <strong className="text-foreground">Telegram</strong> il GPS
+                spesso parte solo dopo un{" "}
+                <strong className="text-foreground">tocco</strong>. Serve per il
+                radar (geohash + distanza come sul bot).
               </>
             )}
           </p>
@@ -110,7 +131,9 @@ const RadarTabContent = ({
               onClick={onRequestLocation}
             >
               <MapPin className="mr-2 h-4 w-4" strokeWidth={1.25} />
-              {geoLoading ? "Rilevazione posizione…" : "Attiva posizione per il radar"}
+              {geoLoading
+                ? "Rilevazione posizione…"
+                : "Attiva posizione per il radar"}
             </Button>
           ) : (
             <p className="text-xs text-destructive">
@@ -127,9 +150,10 @@ const RadarTabContent = ({
         data.offerte.length > 0 &&
         !datasetSupportaRadar(data.offerte) && (
           <p className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-100">
-            Le offerte dal server non includono ancora <span className="font-mono">ghash</span> e
-            coordinate: non è possibile applicare il filtro radar. Controlla il deploy Apps Script (
-            <span className="font-mono">api_miniapp</span>).
+            Le offerte dal server non includono ancora{" "}
+            <span className="font-mono">ghash</span> e coordinate: non è
+            possibile applicare il filtro radar. Controlla il deploy Apps Script
+            (<span className="font-mono">api_miniapp</span>).
           </p>
         )}
 
@@ -141,6 +165,7 @@ const RadarTabContent = ({
               radarRangeKm={radarRangeKm}
               onSelectDrop={onSelectDrop}
               userPos={userPos}
+              onZoomLevelChange={onCompactMapZoomLevelChange}
             />
             <Button
               type="button"
