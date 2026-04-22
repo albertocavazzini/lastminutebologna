@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import {
   Circle,
   CircleMarker,
@@ -18,6 +18,10 @@ import "leaflet/dist/leaflet.css";
 
 /** Centro Bologna (MVP radar last minute). */
 const BOLOGNA_CENTER: [number, number] = [44.4949, 11.3426];
+
+/** Vista “dall’alto” prima del fly verso il GPS (stile app mappe native). */
+const INTRO_OVERVIEW_ZOOM = 11;
+const INTRO_TARGET_ZOOM = 15;
 
 /**
  * Basemap CARTO (CDN dedicato), dati OSM — adatto a MVP senza chiave API.
@@ -76,6 +80,47 @@ function offsetLatLngMeters(
   return [lat + dLat, lng + dLng];
 }
 
+/**
+ * Se la posizione arriva dopo il primo render (GPS lento), mostra prima un overview
+ * sulla città e poi anima verso l’utente. Con posizione già disponibile (cache) non fa nulla.
+ */
+function MapIntroFlyFromOverview({
+  userPos,
+  initialView,
+  autoFitOnMount,
+}: {
+  userPos: UserMapPosition | null;
+  initialView: MapViewProps["initialView"];
+  autoFitOnMount: boolean;
+}) {
+  const map = useMap();
+  const sawMissingUserRef = useRef(false);
+  const introRanRef = useRef(false);
+
+  useEffect(() => {
+    if (!userPos) sawMissingUserRef.current = true;
+  }, [userPos]);
+
+  useLayoutEffect(() => {
+    if (!autoFitOnMount || initialView) return;
+    if (!userPos || !sawMissingUserRef.current) return;
+    if (introRanRef.current) return;
+    introRanRef.current = true;
+
+    map.stop();
+    map.setView(BOLOGNA_CENTER, INTRO_OVERVIEW_ZOOM, { animate: false });
+    const raf = requestAnimationFrame(() => {
+      map.flyTo([userPos.lat, userPos.lng], INTRO_TARGET_ZOOM, {
+        duration: 0.9,
+        easeLinearity: 0.22,
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [map, userPos, initialView, autoFitOnMount]);
+
+  return null;
+}
+
 function MapBounds({
   drops,
   userPos,
@@ -91,10 +136,16 @@ function MapBounds({
 
   useEffect(() => {
     const userPosKey = userPos ? `${userPos.lat.toFixed(6)}:${userPos.lng.toFixed(6)}` : "";
-    if (userPosKey !== lastUserPosKeyRef.current) {
-      hasAutoFittedRef.current = false;
+    const prevKey = lastUserPosKeyRef.current;
+    if (userPosKey === prevKey) return;
+    // Prima posizione GPS dopo mount senza utente: non rifare fitBounds (altrimenti
+    // sovrascrive l’overview + fly di MapIntroFlyFromOverview).
+    if (prevKey === "" && userPosKey !== "") {
       lastUserPosKeyRef.current = userPosKey;
+      return;
     }
+    hasAutoFittedRef.current = false;
+    lastUserPosKeyRef.current = userPosKey;
   }, [userPos]);
 
   useEffect(() => {
@@ -301,6 +352,11 @@ const MapView = ({
           subdomains="abcd"
           maxZoom={20}
           maxNativeZoom={20}
+        />
+        <MapIntroFlyFromOverview
+          userPos={userPos}
+          initialView={initialView}
+          autoFitOnMount={autoFitOnMount}
         />
         <MapBounds drops={drops} userPos={userPos} autoFitOnMount={autoFitOnMount} />
         <MapZoomListener onZoomLevelChange={onZoomLevelChange} onViewChange={onViewChange} />
