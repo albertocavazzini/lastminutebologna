@@ -30,7 +30,6 @@ export function useRadarOfferte({
   const mapCompactRadarScope =
     activeTab === "radar" &&
     viewMode === "map" &&
-    !isMapFullscreen &&
     !isMapZoomedOut &&
     Boolean(userPos);
   const scope: "all" | "radar" = mapCompactRadarScope ? "radar" : "all";

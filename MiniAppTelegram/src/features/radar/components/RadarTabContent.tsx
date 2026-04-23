@@ -99,6 +99,11 @@ const RadarTabContent = ({
       {isPending && webAppBase && (
         <p className="text-sm text-muted-foreground">Caricamento offerte…</p>
       )}
+      {!isPending && viewMode === "map" && userPos && radarDrops.length === 0 && data?.ok && (
+        <p className="mb-3 text-sm text-muted-foreground">
+          Nessuna offerta attiva nel raggio da te in questo momento.
+        </p>
+      )}
 
       {apiErrorMessage && (
         <p className="mb-3 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -214,11 +219,6 @@ const RadarTabContent = ({
                 </Button>
               </div>
             </div>
-          )}
-          {userPos && radarDrops.length === 0 && data?.ok && !isPending && (
-            <p className="mt-2 text-center text-xs text-muted-foreground">
-              Nessuna offerta attiva nel raggio da te in questo momento.
-            </p>
           )}
         </div>
       ) : (
