@@ -238,6 +238,10 @@ const MapView = ({
 }: MapViewProps) => {
   const radarRangeM = Math.max(0, Math.round(radarRangeKm * 1000));
   const sharedVectorRenderer = useMemo(() => L.svg(), []);
+  const userCenter = useMemo<[number, number] | null>(
+    () => (userPos ? [userPos.lat, userPos.lng] : null),
+    [userPos],
+  );
   const nearbyDrops = useMemo(
     () =>
       !userPos
@@ -367,9 +371,9 @@ const MapView = ({
         <MapBounds drops={drops} userPos={userPos} autoFitOnMount={autoFitOnMount} />
         <MapZoomListener onZoomLevelChange={onZoomLevelChange} onViewChange={onViewChange} />
         <ZoomControl position="topright" />
-        {userPos && radarRangeM > 0 ? (
+        {userCenter && radarRangeM > 0 ? (
           <Circle
-            center={[userPos.lat, userPos.lng]}
+            center={userCenter}
             radius={radarRangeM}
             renderer={sharedVectorRenderer}
             pathOptions={{
@@ -382,9 +386,9 @@ const MapView = ({
             }}
           />
         ) : null}
-        {userPos ? (
+        {userCenter ? (
           <CircleMarker
-            center={[userPos.lat, userPos.lng]}
+            center={userCenter}
             radius={7}
             renderer={sharedVectorRenderer}
             pathOptions={{
