@@ -106,7 +106,7 @@ const DropDetail = ({
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-50 flex items-end justify-center bg-background/90 sm:items-center"
+        className="fixed inset-0 z-[1600] flex items-end justify-center bg-background/90 sm:items-center"
         onClick={onClose}
       >
         <motion.div
