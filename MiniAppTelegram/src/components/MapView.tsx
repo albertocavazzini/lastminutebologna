@@ -188,6 +188,9 @@ function MapZoomListener({
   onViewChange?: (view: { centerLat: number; centerLng: number; zoom: number }) => void;
 }) {
   const map = useMapEvents({
+    zoom: () => {
+      onZoomLevelChange?.(map.getZoom());
+    },
     zoomend: () => {
       onZoomLevelChange?.(map.getZoom());
       const c = map.getCenter();
@@ -344,7 +347,7 @@ const MapView = ({
         zoom={initialZoom}
         className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-lmb-label"
         scrollWheelZoom
-        touchZoom="center"
+        touchZoom
         zoomAnimation={false}
         zoomControl={false}
         attributionControl={false}
