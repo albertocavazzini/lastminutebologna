@@ -468,12 +468,12 @@ const MapView = ({
         {farClusters.map((cluster) => {
           const px = cluster.radiusM / Math.max(0.0001, metersPerPixelAtLat(cluster.lat));
           const hotspotIcon = circularOverlayIcon({
-            radiusPx: px,
+            radiusPx: Math.max(16, Math.min(240, px)),
             borderColor: "#2563eb",
-            borderWidthPx: 1,
+            borderWidthPx: 2,
             borderStyle: "dashed",
-            fillColor: "rgba(59,130,246,0.12)",
-            opacity: 0.65,
+            fillColor: "rgba(59,130,246,0.18)",
+            opacity: 0.85,
           });
           return (
             <Marker

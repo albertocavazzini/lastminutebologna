@@ -22,7 +22,7 @@ import MainTopBar from "@/features/radar/components/MainTopBar";
 import RadarTabContent from "@/features/radar/components/RadarTabContent";
 
 const Index = () => {
-  const MAP_ZOOM_FULL_SCOPE_THRESHOLD = 12;
+  const MAP_ZOOM_FULL_SCOPE_THRESHOLD = 14.5;
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("radar");
   const [viewMode, setViewMode] = useState<"map" | "list">("list");
