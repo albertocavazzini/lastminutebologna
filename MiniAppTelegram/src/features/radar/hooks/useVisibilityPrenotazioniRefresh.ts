@@ -2,8 +2,8 @@ import { useEffect, useRef } from "react";
 import type { QueryClient } from "@tanstack/react-query";
 import { MINIAPP_PRENOTAZIONI_QUERY_ROOT } from "@/api/miniappPrenotazioni";
 
-const VISIBILITY_PRENOTAZIONI_COOLDOWN_MS = 30_000;
-const VISIBILITY_MIN_HIDDEN_MS = 3_000;
+const VISIBILITY_PRENOTAZIONI_COOLDOWN_MS = 10 * 60_000;
+const VISIBILITY_MIN_HIDDEN_MS = 30_000;
 
 export function useVisibilityPrenotazioniRefresh(queryClient: QueryClient) {
   const hiddenAtRef = useRef<number | null>(null);

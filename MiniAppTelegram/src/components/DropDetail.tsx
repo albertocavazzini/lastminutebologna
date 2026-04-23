@@ -25,6 +25,8 @@ import type { Drop } from "@/data/mockDrops";
 import { MINIAPP_OFFERTE_QUERY_ROOT } from "@/api/miniappOfferte";
 import { MINIAPP_PRENOTAZIONI_QUERY_ROOT } from "@/api/miniappPrenotazioni";
 
+const PRENOTAZIONI_PENDING_SYNC_KEY = "lmb-prenotazioni-pending-sync-v1";
+
 interface DropDetailProps {
   drop: Drop | null;
   onClose: () => void;
@@ -72,6 +74,17 @@ const DropDetail = ({
   const openTelegramPrenota = () => {
     const url = drop.linkPrenota;
     if (!url) return;
+    try {
+      window.localStorage.setItem(
+        PRENOTAZIONI_PENDING_SYNC_KEY,
+        JSON.stringify({
+          ts: Date.now(),
+          idOfferta: drop.id,
+        }),
+      );
+    } catch {
+      // ignore storage errors (privacy mode/quota)
+    }
     const tw = window.Telegram?.WebApp;
     if (tw && typeof tw.openTelegramLink === "function") {
       tw.openTelegramLink(url);

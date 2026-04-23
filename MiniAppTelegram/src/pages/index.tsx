@@ -3,6 +3,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Drop } from "@/data/mockDrops";
 import {
+  MINIAPP_OFFERTE_QUERY_ROOT,
+  fetchMiniappOfferteJsonp,
+} from "@/api/miniappOfferte";
+import {
   fetchMiniappPrenotazioniJsonp,
   MINIAPP_PRENOTAZIONI_STALE_MS,
 } from "@/api/miniappPrenotazioni";
@@ -50,6 +54,14 @@ const Index = () => {
 
   const webAppBase = projectEnv.appsScriptWebAppBase?.trim() ?? "";
   const initData = getTelegramInitData();
+  const viewportBucket = useMemo(() => {
+    const view = compactMapView;
+    if (!view) return "no-view";
+    const zoomBucket = Math.floor(view.zoom * 2) / 2;
+    const latBucket = view.centerLat.toFixed(3);
+    const lngBucket = view.centerLng.toFixed(3);
+    return `${zoomBucket}:${latBucket}:${lngBucket}`;
+  }, [compactMapView]);
 
   useEffect(() => {
     handleViewModeChange(activeTab, viewMode);
@@ -102,7 +114,51 @@ const Index = () => {
     viewMode,
     isMapFullscreen,
     isMapZoomedOut: isMapZoomedOut || isAllScopeLocked,
+    viewportBucket,
   });
+
+  useEffect(() => {
+    if (activeTab !== "radar") return;
+    if (!webAppBase) return;
+    const shared = {
+      userLat: userPos?.lat ?? null,
+      userLng: userPos?.lng ?? null,
+    };
+    void queryClient.prefetchQuery({
+      queryKey: [
+        MINIAPP_OFFERTE_QUERY_ROOT,
+        webAppBase,
+        "all",
+        viewportBucket,
+        userPos?.lat ?? null,
+        userPos?.lng ?? null,
+      ],
+      queryFn: () =>
+        fetchMiniappOfferteJsonp(webAppBase, {
+          scope: "all",
+          ...shared,
+        }),
+      staleTime: 3 * 60_000,
+    });
+    if (userPos) {
+      void queryClient.prefetchQuery({
+        queryKey: [
+          MINIAPP_OFFERTE_QUERY_ROOT,
+          webAppBase,
+          "radar",
+          viewportBucket,
+          userPos.lat,
+          userPos.lng,
+        ],
+        queryFn: () =>
+          fetchMiniappOfferteJsonp(webAppBase, {
+            scope: "radar",
+            ...shared,
+          }),
+        staleTime: 3 * 60_000,
+      });
+    }
+  }, [activeTab, webAppBase, viewportBucket, userPos, queryClient]);
 
   const { data: prenotazioniData } = useQuery({
     queryKey: ["miniapp-prenotazioni", webAppBase, initData.slice(0, 80)],

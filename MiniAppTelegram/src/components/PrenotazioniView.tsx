@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, QrCode, RefreshCw, Store } from "lucide-react";
 import {
@@ -9,6 +9,8 @@ import { projectEnv } from "@/config/projectEnv";
 import { getTelegramInitData } from "@/lib/telegramWebApp";
 import { Button } from "@/components/ui/button";
 import PrenotazioniFeedbackPanel from "@/components/PrenotazioniFeedbackPanel";
+
+const PRENOTAZIONI_PENDING_SYNC_KEY = "lmb-prenotazioni-pending-sync-v1";
 
 function formatData(iso: string): string {
   if (!iso) return "—";
@@ -40,6 +42,25 @@ const PrenotazioniView = ({ subView }: PrenotazioniViewProps) => {
     staleTime: MINIAPP_PRENOTAZIONI_STALE_MS,
     refetchOnWindowFocus: false,
   });
+
+  useEffect(() => {
+    if (subView !== "lista") return;
+    if (!webAppBase || !initData) return;
+    let hasPendingSync = false;
+    try {
+      hasPendingSync = Boolean(window.localStorage.getItem(PRENOTAZIONI_PENDING_SYNC_KEY));
+    } catch {
+      hasPendingSync = false;
+    }
+    if (!hasPendingSync) return;
+    void refetch().finally(() => {
+      try {
+        window.localStorage.removeItem(PRENOTAZIONI_PENDING_SYNC_KEY);
+      } catch {
+        // ignore storage errors
+      }
+    });
+  }, [subView, webAppBase, initData, refetch]);
 
   const list = useMemo(
     () => (data?.ok ? (data.prenotazioni ?? []) : []),

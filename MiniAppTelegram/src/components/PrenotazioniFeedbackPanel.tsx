@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Calendar, MessageSquare, RefreshCw, Star, Store } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   fetchMiniappFeedbackDaLasciareJsonp,
   inviaMiniappFeedbackJsonp,
@@ -9,6 +9,35 @@ import { projectEnv } from "@/config/projectEnv";
 import { getTelegramInitData } from "@/lib/telegramWebApp";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+
+const FEEDBACK_DELAY_MS = 30 * 60_000;
+const FEEDBACK_UNLOCK_CACHE_KEY = "lmb-feedback-unlock-v1";
+const FEEDBACK_LIST_STALE_MS = 5 * 60_000;
+
+function readFeedbackUnlockCache(): Record<string, number> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(FEEDBACK_UNLOCK_CACHE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const clean: Record<string, number> = {};
+    for (const [k, v] of Object.entries(parsed)) {
+      if (typeof v === "number" && Number.isFinite(v)) clean[k] = v;
+    }
+    return clean;
+  } catch {
+    return {};
+  }
+}
+
+function writeFeedbackUnlockCache(next: Record<string, number>) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(FEEDBACK_UNLOCK_CACHE_KEY, JSON.stringify(next));
+  } catch {
+    // ignore quota/security storage errors
+  }
+}
 
 function formatData(iso: string): string {
   if (!iso) return "—";
@@ -156,7 +185,8 @@ const PrenotazioniFeedbackPanel = ({
     queryKey: ["miniapp-feedback-richieste", webAppBase, initData.slice(0, 80)],
     queryFn: () => fetchMiniappFeedbackDaLasciareJsonp(webAppBase, initData),
     enabled: Boolean(webAppBase && initData),
-    staleTime: 15_000,
+    staleTime: FEEDBACK_LIST_STALE_MS,
+    refetchOnWindowFocus: false,
   });
 
   const apiErr =
@@ -167,6 +197,40 @@ const PrenotazioniFeedbackPanel = ({
         : null;
 
   const list = data?.ok ? data.feedback_richieste ?? [] : [];
+  const [unlockCache, setUnlockCache] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    setUnlockCache(readFeedbackUnlockCache());
+  }, []);
+
+  useEffect(() => {
+    if (!data?.ok) return;
+    const now = Date.now();
+    const next = { ...unlockCache };
+    let changed = false;
+    for (const r of list) {
+      const parsed = new Date(r.ora_scansione).getTime();
+      const computedUnlockAt = Number.isFinite(parsed) ? parsed + FEEDBACK_DELAY_MS : now;
+      const prevUnlockAt = next[r.id_prenotazione] ?? 0;
+      const finalUnlockAt = Math.max(prevUnlockAt, computedUnlockAt);
+      if (finalUnlockAt !== prevUnlockAt) {
+        next[r.id_prenotazione] = finalUnlockAt;
+        changed = true;
+      }
+    }
+    if (changed) {
+      setUnlockCache(next);
+      writeFeedbackUnlockCache(next);
+    }
+  }, [data, list, unlockCache]);
+
+  const visibleList = useMemo(() => {
+    const now = Date.now();
+    return list.filter((r) => {
+      const unlockAt = unlockCache[r.id_prenotazione];
+      return !unlockAt || unlockAt <= now;
+    });
+  }, [list, unlockCache]);
 
   return (
     <div className="space-y-4 pb-8">
@@ -212,14 +276,14 @@ const PrenotazioniFeedbackPanel = ({
         </p>
       )}
 
-      {!isPending && data?.ok && list.length === 0 && (
+      {!isPending && data?.ok && visibleList.length === 0 && (
         <p className="rounded-xl border border-border/50 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
           Nessun feedback in sospeso.
         </p>
       )}
 
       <ul className="space-y-4">
-        {list.map((r) => (
+        {visibleList.map((r) => (
           <FeedbackCard
             key={r.id_prenotazione}
             webAppBase={webAppBase}

@@ -15,7 +15,7 @@ export type MiniappPrenotazioniResponse = {
 };
 
 /** StaleTime condiviso (Index + Prenotazioni): meno GET al cambio tab; si rivalida dopo bot / visibility. */
-export const MINIAPP_PRENOTAZIONI_STALE_MS = 60_000;
+export const MINIAPP_PRENOTAZIONI_STALE_MS = 5 * 60_000;
 
 export const MINIAPP_PRENOTAZIONI_QUERY_ROOT = "miniapp-prenotazioni" as const;
 

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
+  MINIAPP_OFFERTE_QUERY_ROOT,
   datasetSupportaRadar,
   fetchMiniappOfferteJsonp,
   filterOffersRadarStyle,
@@ -8,7 +9,6 @@ import {
 } from "@/api/miniappOfferte";
 import type { UserMapPosition } from "@/lib/geo/userMapPosition";
 
-const RADAR_OFFERTE_REFETCH_MS = 60_000;
 const RADAR_DEFAULT_KM = 5.12;
 const RADAR_DEFAULT_PRECISION = 6;
 
@@ -19,6 +19,7 @@ export function useRadarOfferte({
   viewMode,
   isMapFullscreen,
   isMapZoomedOut,
+  viewportBucket,
 }: {
   webAppBase: string;
   activeTab: string;
@@ -26,6 +27,7 @@ export function useRadarOfferte({
   viewMode: "map" | "list";
   isMapFullscreen: boolean;
   isMapZoomedOut: boolean;
+  viewportBucket?: string | null;
 }) {
   const mapCompactRadarScope =
     activeTab === "radar" &&
@@ -35,16 +37,24 @@ export function useRadarOfferte({
   const scope: "all" | "radar" = mapCompactRadarScope ? "radar" : "all";
 
   const query = useQuery({
-    queryKey: ["miniapp-offerte", webAppBase, scope, userPos?.lat ?? null, userPos?.lng ?? null],
+    queryKey: [
+      MINIAPP_OFFERTE_QUERY_ROOT,
+      webAppBase,
+      scope,
+      viewportBucket ?? "no-viewport",
+      userPos?.lat ?? null,
+      userPos?.lng ?? null,
+    ],
     queryFn: () =>
       fetchMiniappOfferteJsonp(webAppBase, {
         scope,
         userLat: userPos?.lat ?? null,
         userLng: userPos?.lng ?? null,
       }),
-    staleTime: 60_000,
+    staleTime: 3 * 60_000,
     enabled: Boolean(webAppBase),
-    refetchInterval: activeTab === "radar" ? RADAR_OFFERTE_REFETCH_MS : false,
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
   });
 
   const radarDrops = useMemo(() => {
