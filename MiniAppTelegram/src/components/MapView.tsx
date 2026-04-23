@@ -1,7 +1,5 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
-  Circle,
-  CircleMarker,
   MapContainer,
   Marker,
   TileLayer,
@@ -57,6 +55,7 @@ const HOTSPOT_GEOHASH_PRECISION = 5;
 const HOTSPOT_MIN_RADIUS_M = 140;
 const HOTSPOT_MAX_RADIUS_M = 420;
 const HOTSPOT_PRIVACY_OFFSET_M = 180;
+const EARTH_CIRCUMFERENCE_M_PER_PX_AT_Z0 = 156543.03392;
 
 function pseudoRandomUnitFromKey(key: string): number {
   let hash = 0;
@@ -208,6 +207,24 @@ function MapZoomListener({
   return null;
 }
 
+function MapLiveZoomTracker({
+  onZoomChange,
+}: {
+  onZoomChange: (zoom: number) => void;
+}) {
+  const map = useMapEvents({
+    zoom: () => {
+      onZoomChange(map.getZoom());
+    },
+  });
+
+  useEffect(() => {
+    onZoomChange(map.getZoom());
+  }, [map, onZoomChange]);
+
+  return null;
+}
+
 /** Pin “posizione” classico (SVG), distinto dai cerchi cluster blu. */
 function nearbyOfferLocationPinIcon(fillColor: string): L.DivIcon {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40" aria-hidden="true">
@@ -223,6 +240,39 @@ function nearbyOfferLocationPinIcon(fillColor: string): L.DivIcon {
   });
 }
 
+function circularOverlayIcon({
+  radiusPx,
+  borderColor,
+  borderWidthPx,
+  borderStyle = "solid",
+  fillColor,
+  opacity = 1,
+}: {
+  radiusPx: number;
+  borderColor: string;
+  borderWidthPx: number;
+  borderStyle?: "solid" | "dashed";
+  fillColor: string;
+  opacity?: number;
+}): L.DivIcon {
+  const diameterPx = Math.max(2, Math.round(radiusPx * 2));
+  return L.divIcon({
+    className: "lmb-overlay-circle",
+    iconSize: [diameterPx, diameterPx],
+    iconAnchor: [diameterPx / 2, diameterPx / 2],
+    html: `<span style="
+      display:block;
+      width:${diameterPx}px;
+      height:${diameterPx}px;
+      border-radius:9999px;
+      border:${borderWidthPx}px ${borderStyle} ${borderColor};
+      background:${fillColor};
+      opacity:${opacity};
+      box-sizing:border-box;
+    "></span>`,
+  });
+}
+
 const MapView = ({
   drops,
   radarRangeKm,
@@ -234,6 +284,7 @@ const MapView = ({
   autoFitOnMount = true,
 }: MapViewProps) => {
   const radarRangeM = Math.max(0, Math.round(radarRangeKm * 1000));
+  const [liveZoom, setLiveZoom] = useState(initialView?.zoom ?? 13);
   const nearbyDrops = useMemo(
     () =>
       !userPos
@@ -336,6 +387,35 @@ const MapView = ({
   }, [initialView, userPos, drops]);
   const initialZoom = initialView?.zoom ?? 13;
 
+  useEffect(() => {
+    setLiveZoom(initialZoom);
+  }, [initialZoom]);
+
+  const currentZoom = Number.isFinite(liveZoom) ? liveZoom : initialZoom;
+  const metersPerPixelAtLat = (lat: number) =>
+    (EARTH_CIRCUMFERENCE_M_PER_PX_AT_Z0 * Math.cos((lat * Math.PI) / 180)) /
+    2 ** currentZoom;
+  const radarRadiusPx = userPos
+    ? radarRangeM / Math.max(0.0001, metersPerPixelAtLat(userPos.lat))
+    : 0;
+  const userDotIcon = circularOverlayIcon({
+    radiusPx: 7,
+    borderColor: "#ffffff",
+    borderWidthPx: 2,
+    fillColor: "#484848",
+  });
+  const radarCircleIcon =
+    userPos && radarRangeM > 0
+      ? circularOverlayIcon({
+          radiusPx: radarRadiusPx,
+          borderColor: "#059669",
+          borderWidthPx: 2,
+          borderStyle: "dashed",
+          fillColor: "rgba(16,185,129,0.08)",
+          opacity: 0.9,
+        })
+      : null;
+
   return (
     <div className="relative h-full w-full overflow-hidden rounded-2xl border border-border/40 shadow-inner">
       <MapContainer
@@ -360,34 +440,13 @@ const MapView = ({
         />
         <MapBounds drops={drops} userPos={userPos} autoFitOnMount={autoFitOnMount} />
         <MapZoomListener onZoomLevelChange={onZoomLevelChange} onViewChange={onViewChange} />
+        <MapLiveZoomTracker onZoomChange={setLiveZoom} />
         <ZoomControl position="topright" />
-        {userPos && radarRangeM > 0 ? (
-          <Circle
-            center={[userPos.lat, userPos.lng]}
-            radius={radarRangeM}
-            interactive={false}
-            pathOptions={{
-              color: "#059669",
-              fillColor: "#10b981",
-              fillOpacity: 0.08,
-              weight: 2.5,
-              opacity: 0.85,
-              dashArray: "10 8",
-            }}
-          />
+        {userPos && radarCircleIcon ? (
+          <Marker position={[userPos.lat, userPos.lng]} icon={radarCircleIcon} interactive={false} />
         ) : null}
         {userPos ? (
-          <CircleMarker
-            center={[userPos.lat, userPos.lng]}
-            radius={7}
-            interactive={false}
-            pathOptions={{
-              color: "#ffffff",
-              weight: 2,
-              fillColor: "#484848",
-              fillOpacity: 1,
-            }}
-          />
+          <Marker position={[userPos.lat, userPos.lng]} icon={userDotIcon} interactive={false} />
         ) : null}
         {nearbyDrops.map((drop) => (
           <Marker
@@ -403,21 +462,25 @@ const MapView = ({
             }}
           />
         ))}
-        {farClusters.map((cluster) => (
-          <Circle
-            key={`hotspot-${cluster.key}`}
-            center={[cluster.lat, cluster.lng]}
-            radius={cluster.radiusM}
-            pathOptions={{
-              color: "#2563eb",
-              fillColor: "#3b82f6",
-              fillOpacity: 0.12,
-              weight: 1.5,
-              opacity: 0.55,
-              dashArray: "4 10",
-            }}
-          />
-        ))}
+        {farClusters.map((cluster) => {
+          const px = cluster.radiusM / Math.max(0.0001, metersPerPixelAtLat(cluster.lat));
+          const hotspotIcon = circularOverlayIcon({
+            radiusPx: px,
+            borderColor: "#2563eb",
+            borderWidthPx: 1,
+            borderStyle: "dashed",
+            fillColor: "rgba(59,130,246,0.12)",
+            opacity: 0.65,
+          });
+          return (
+            <Marker
+              key={`hotspot-${cluster.key}`}
+              position={[cluster.lat, cluster.lng]}
+              icon={hotspotIcon}
+              interactive={false}
+            />
+          );
+        })}
         {farClusters.map((cluster) => (
           <Marker
             key={`hotspot-count-${cluster.key}`}
