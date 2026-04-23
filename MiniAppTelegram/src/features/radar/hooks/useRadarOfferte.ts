@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   datasetSupportaRadar,
@@ -27,6 +27,7 @@ export function useRadarOfferte({
   isMapFullscreen: boolean;
   isMapZoomedOut: boolean;
 }) {
+  const lastKnownRadarRangeKmRef = useRef<number>(RADAR_DEFAULT_KM);
   const mapCompactRadarScope =
     activeTab === "radar" &&
     viewMode === "map" &&
@@ -47,6 +48,13 @@ export function useRadarOfferte({
     enabled: Boolean(webAppBase),
     refetchInterval: activeTab === "radar" ? RADAR_OFFERTE_REFETCH_MS : false,
   });
+
+  useEffect(() => {
+    const nextRange = query.data?.raggio_km;
+    if (typeof nextRange === "number" && Number.isFinite(nextRange) && nextRange > 0) {
+      lastKnownRadarRangeKmRef.current = nextRange;
+    }
+  }, [query.data?.raggio_km]);
 
   const radarDrops = useMemo(() => {
     const data = query.data;
@@ -74,7 +82,7 @@ export function useRadarOfferte({
       .sort((a, b) => a.distance - b.distance);
   }, [query.data, userPos]);
 
-  const radarRangeKm = query.data?.raggio_km ?? RADAR_DEFAULT_KM;
+  const radarRangeKm = query.data?.raggio_km ?? lastKnownRadarRangeKmRef.current;
 
   return {
     ...query,
