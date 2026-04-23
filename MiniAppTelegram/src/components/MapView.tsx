@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import {
   Circle,
-  CircleMarker,
   MapContainer,
   Marker,
   TileLayer,
@@ -188,9 +187,6 @@ function MapZoomListener({
   onViewChange?: (view: { centerLat: number; centerLng: number; zoom: number }) => void;
 }) {
   const map = useMapEvents({
-    zoom: () => {
-      onZoomLevelChange?.(map.getZoom());
-    },
     zoomend: () => {
       onZoomLevelChange?.(map.getZoom());
       const c = map.getCenter();
@@ -226,6 +222,21 @@ function nearbyOfferLocationPinIcon(fillColor: string): L.DivIcon {
   });
 }
 
+const USER_POSITION_DOT_ICON = L.divIcon({
+  className: "lmb-user-position-dot",
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+  html: `<span style="
+    display:block;
+    width:14px;
+    height:14px;
+    border-radius:9999px;
+    border:2px solid #ffffff;
+    background:#484848;
+    box-sizing:border-box;
+  "></span>`,
+});
+
 const MapView = ({
   drops,
   radarRangeKm,
@@ -237,11 +248,6 @@ const MapView = ({
   autoFitOnMount = true,
 }: MapViewProps) => {
   const radarRangeM = Math.max(0, Math.round(radarRangeKm * 1000));
-  const sharedVectorRenderer = useMemo(() => L.svg(), []);
-  const userCenter = useMemo<[number, number] | null>(
-    () => (userPos ? [userPos.lat, userPos.lng] : null),
-    [userPos],
-  );
   const nearbyDrops = useMemo(
     () =>
       !userPos
@@ -351,8 +357,6 @@ const MapView = ({
         zoom={initialZoom}
         className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-lmb-label"
         scrollWheelZoom
-        touchZoom
-        zoomAnimation={false}
         zoomControl={false}
         attributionControl={false}
       >
@@ -371,11 +375,12 @@ const MapView = ({
         <MapBounds drops={drops} userPos={userPos} autoFitOnMount={autoFitOnMount} />
         <MapZoomListener onZoomLevelChange={onZoomLevelChange} onViewChange={onViewChange} />
         <ZoomControl position="topright" />
-        {userCenter && radarRangeM > 0 ? (
+        {userPos && radarRangeM > 0 ? (
           <Circle
-            center={userCenter}
+            center={[userPos.lat, userPos.lng]}
             radius={radarRangeM}
-            renderer={sharedVectorRenderer}
+            pane="markerPane"
+            interactive={false}
             pathOptions={{
               color: "#059669",
               fillColor: "#10b981",
@@ -386,18 +391,8 @@ const MapView = ({
             }}
           />
         ) : null}
-        {userCenter ? (
-          <CircleMarker
-            center={userCenter}
-            radius={7}
-            renderer={sharedVectorRenderer}
-            pathOptions={{
-              color: "#ffffff",
-              weight: 2,
-              fillColor: "#484848",
-              fillOpacity: 1,
-            }}
-          />
+        {userPos ? (
+          <Marker position={[userPos.lat, userPos.lng]} icon={USER_POSITION_DOT_ICON} />
         ) : null}
         {nearbyDrops.map((drop) => (
           <Marker
