@@ -148,9 +148,13 @@ const Index = () => {
               onRadarTouchEnd={onRadarTouchEnd}
               isMapFullscreen={isMapFullscreen}
               onMapFullscreenChange={setIsMapFullscreen}
-              onCompactMapZoomLevelChange={(zoom) =>
-                setIsMapZoomedOut(zoom <= MAP_ZOOM_FULL_SCOPE_THRESHOLD)
-              }
+              onCompactMapZoomLevelChange={(zoom) => {
+                if (zoom <= MAP_ZOOM_FULL_SCOPE_THRESHOLD) {
+                  // Una volta "sbloccato" lo scope esteso in questa sessione mappa,
+                  // non tornare subito a radar quando l'utente fa zoom-in.
+                  setIsMapZoomedOut(true);
+                }
+              }}
               onCompactMapViewChange={setCompactMapView}
               compactMapView={compactMapView}
             />
