@@ -234,7 +234,6 @@ const MapView = ({
   autoFitOnMount = true,
 }: MapViewProps) => {
   const radarRangeM = Math.max(0, Math.round(radarRangeKm * 1000));
-  const sharedVectorRenderer = useMemo(() => L.canvas(), []);
   const nearbyDrops = useMemo(
     () =>
       !userPos
@@ -344,9 +343,6 @@ const MapView = ({
         zoom={initialZoom}
         className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-lmb-label"
         scrollWheelZoom
-        zoomAnimation={false}
-        markerZoomAnimation={false}
-        fadeAnimation={false}
         zoomControl={false}
         attributionControl={false}
       >
@@ -369,7 +365,6 @@ const MapView = ({
           <Circle
             center={[userPos.lat, userPos.lng]}
             radius={radarRangeM}
-            renderer={sharedVectorRenderer}
             interactive={false}
             pathOptions={{
               color: "#059669",
@@ -385,7 +380,6 @@ const MapView = ({
           <CircleMarker
             center={[userPos.lat, userPos.lng]}
             radius={7}
-            renderer={sharedVectorRenderer}
             interactive={false}
             pathOptions={{
               color: "#ffffff",
