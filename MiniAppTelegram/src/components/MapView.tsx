@@ -344,6 +344,9 @@ const MapView = ({
         zoom={initialZoom}
         className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-lmb-label"
         scrollWheelZoom
+        zoomAnimation={false}
+        markerZoomAnimation={false}
+        fadeAnimation={false}
         zoomControl={false}
         attributionControl={false}
       >
