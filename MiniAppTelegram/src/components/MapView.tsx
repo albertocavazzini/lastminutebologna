@@ -187,6 +187,9 @@ function MapZoomListener({
   onViewChange?: (view: { centerLat: number; centerLng: number; zoom: number }) => void;
 }) {
   const map = useMapEvents({
+    zoom: () => {
+      onZoomLevelChange?.(map.getZoom());
+    },
     zoomend: () => {
       onZoomLevelChange?.(map.getZoom());
       const c = map.getCenter();
