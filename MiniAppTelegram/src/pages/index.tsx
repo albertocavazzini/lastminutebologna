@@ -23,11 +23,14 @@ import RadarTabContent from "@/features/radar/components/RadarTabContent";
 
 const Index = () => {
   const MAP_ZOOM_FULL_SCOPE_THRESHOLD = 14.5;
+  const MAP_ALL_SCOPE_LOCK_MS = 4 * 60 * 1000;
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("radar");
   const [viewMode, setViewMode] = useState<"map" | "list">("list");
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [isMapZoomedOut, setIsMapZoomedOut] = useState(false);
+  const [allScopeLockUntilMs, setAllScopeLockUntilMs] = useState<number | null>(null);
+  const [isAllScopeLocked, setIsAllScopeLocked] = useState(false);
   const [compactMapView, setCompactMapView] = useState<{
     centerLat: number;
     centerLng: number;
@@ -56,8 +59,29 @@ const Index = () => {
     if (activeTab !== "radar" || viewMode !== "map") {
       setIsMapFullscreen(false);
       setIsMapZoomedOut(false);
+      setAllScopeLockUntilMs(null);
+      setIsAllScopeLocked(false);
     }
   }, [activeTab, viewMode]);
+
+  useEffect(() => {
+    if (!allScopeLockUntilMs) {
+      setIsAllScopeLocked(false);
+      return;
+    }
+    const remainingMs = allScopeLockUntilMs - Date.now();
+    if (remainingMs <= 0) {
+      setIsAllScopeLocked(false);
+      setAllScopeLockUntilMs(null);
+      return;
+    }
+    setIsAllScopeLocked(true);
+    const t = window.setTimeout(() => {
+      setIsAllScopeLocked(false);
+      setAllScopeLockUntilMs(null);
+    }, remainingMs);
+    return () => window.clearTimeout(t);
+  }, [allScopeLockUntilMs]);
 
   useVisibilityPrenotazioniRefresh(queryClient);
 
@@ -77,7 +101,7 @@ const Index = () => {
     userPos,
     viewMode,
     isMapFullscreen,
-    isMapZoomedOut,
+    isMapZoomedOut: isMapZoomedOut || isAllScopeLocked,
   });
 
   const { data: prenotazioniData } = useQuery({
@@ -150,9 +174,10 @@ const Index = () => {
               onMapFullscreenChange={setIsMapFullscreen}
               onCompactMapZoomLevelChange={(zoom) => {
                 if (zoom <= MAP_ZOOM_FULL_SCOPE_THRESHOLD) {
-                  // Una volta "sbloccato" lo scope esteso in questa sessione mappa,
-                  // non tornare subito a radar quando l'utente fa zoom-in.
                   setIsMapZoomedOut(true);
+                  // Mantiene lo scope esteso per qualche minuto anche dopo zoom-in,
+                  // evitando flapping e sparizioni mentre esplori l'area.
+                  setAllScopeLockUntilMs(Date.now() + MAP_ALL_SCOPE_LOCK_MS);
                 }
               }}
               onCompactMapViewChange={setCompactMapView}
