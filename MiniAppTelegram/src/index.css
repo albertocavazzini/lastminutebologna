@@ -296,7 +296,7 @@ main.lmb-main-scroll-pb {
 .lmb-map-viewport-height {
   min-height: 240px;
   height: calc(
-    100dvh - 10.75rem - env(safe-area-inset-top, 0px) -
+    100dvh - 11.25rem - env(safe-area-inset-top, 0px) -
       var(--tg-safe-area-inset-top, 0px) -
       var(--tg-content-safe-area-inset-top, 0px) -
       max(
