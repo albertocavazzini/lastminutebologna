@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Drop } from "@/data/mockDrops";
 import { MINIAPP_OFFERTE_QUERY_ROOT } from "@/api/miniappOfferte";
-import { MINIAPP_PRENOTAZIONI_QUERY_ROOT } from "@/api/miniappPrenotazioni";
 
 const PRENOTAZIONI_PENDING_SYNC_KEY = "lmb-prenotazioni-pending-sync-v1";
 
@@ -91,7 +90,8 @@ const DropDetail = ({
     } else {
       window.open(url, "_blank", "noopener,noreferrer");
     }
-    void queryClient.invalidateQueries({ queryKey: [MINIAPP_PRENOTAZIONI_QUERY_ROOT] });
+    // Non forzare subito il refetch prenotazioni: la pagina QR si aggiorna quando
+    // rileva il flag cache "pending sync", riducendo chiamate non necessarie.
     void queryClient.invalidateQueries({ queryKey: [MINIAPP_OFFERTE_QUERY_ROOT] });
     onClose();
   };
