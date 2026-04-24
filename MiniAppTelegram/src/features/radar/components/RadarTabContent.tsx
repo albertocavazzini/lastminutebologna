@@ -111,6 +111,16 @@ const RadarTabContent = ({
         </p>
       )}
 
+      {webAppBase && geoDenied && !userPos && (
+        <div className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-3">
+          <p className="text-xs text-amber-900 dark:text-amber-100">
+            <strong className="text-foreground">Posizione disattivata.</strong>{" "}
+            Per ricevere notifiche vicine abilita la posizione per Telegram nelle impostazioni del
+            telefono, poi torna qui e tocca il pulsante sotto.
+          </p>
+        </div>
+      )}
+
       {webAppBase && geoDone && !userPos && (
         <div className="mb-3 space-y-3 rounded-xl border border-border/60 bg-muted/40 px-3 py-3">
           <p className="text-xs text-muted-foreground">

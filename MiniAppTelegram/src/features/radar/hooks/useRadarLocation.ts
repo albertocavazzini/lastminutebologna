@@ -14,6 +14,8 @@ import {
 const REFINE_MAP_MIN_INTERVAL_MS = 30 * 60 * 1000;
 /** Evita burst JSONP verso AppScript (salvaPosizioneUtente ha già dedup lato server). */
 const FIREBASE_POSIZIONE_MIN_INTERVAL_MS = 120_000;
+/** Prompt geolocalizzazione automatico solo al primo avvio mini app. */
+const GEO_FIRST_PROMPT_DONE_KEY = "lmb-geo-first-prompt-done-v1";
 
 export function useRadarLocation(webAppBase: string, initData: string) {
   const [userPos, setUserPos] = useState<UserMapPosition | null>(() =>
@@ -104,6 +106,18 @@ export function useRadarLocation(webAppBase: string, initData: string) {
 
   useEffect(() => {
     if (readGeoCache()) return;
+    let firstPromptDone = false;
+    try {
+      firstPromptDone = window.localStorage.getItem(GEO_FIRST_PROMPT_DONE_KEY) === "1";
+    } catch {
+      firstPromptDone = false;
+    }
+    if (firstPromptDone) return;
+    try {
+      window.localStorage.setItem(GEO_FIRST_PROMPT_DONE_KEY, "1");
+    } catch {
+      // ignore storage errors: fallback a comportamento best-effort
+    }
     requestLocation();
   }, [requestLocation]);
 
@@ -111,7 +125,7 @@ export function useRadarLocation(webAppBase: string, initData: string) {
     (activeTab: string, viewMode: "map" | "list") => {
       if (activeTab === "radar" && viewMode === "map" && prevViewMode.current !== "map") {
         const savedAt = getGeoCacheSavedAt();
-        if (savedAt == null || Date.now() - savedAt >= REFINE_MAP_MIN_INTERVAL_MS) {
+        if (savedAt != null && Date.now() - savedAt >= REFINE_MAP_MIN_INTERVAL_MS) {
           refineLocation();
         }
       }
