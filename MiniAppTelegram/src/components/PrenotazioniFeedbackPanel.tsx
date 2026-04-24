@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Calendar, MessageSquare, RefreshCw, Star, Store } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
+  fetchMiniappFeedbackMetaJsonp,
   fetchMiniappFeedbackDaLasciareJsonp,
   inviaMiniappFeedbackJsonp,
 } from "@/api/miniappFeedback";
@@ -13,6 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 const FEEDBACK_DELAY_MS = 0;
 const FEEDBACK_UNLOCK_CACHE_KEY = "lmb-feedback-unlock-v1";
 const FEEDBACK_LIST_STALE_MS = 5 * 60_000;
+const FEEDBACK_META_STALE_MS = 30_000;
+const FEEDBACK_META_REFETCH_MS = 60_000;
 
 function readFeedbackUnlockCache(): Record<string, number> {
   if (typeof window === "undefined") return {};
@@ -180,10 +183,25 @@ const PrenotazioniFeedbackPanel = ({
   webAppBase,
   initData,
 }: PrenotazioniFeedbackPanelProps) => {
-  const { data, isPending, isError, error, refetch, isFetching } = useQuery({
-    queryKey: ["miniapp-feedback-richieste", webAppBase, initData.slice(0, 80)],
-    queryFn: () => fetchMiniappFeedbackDaLasciareJsonp(webAppBase, initData),
+  const queryScopeKey = initData.slice(0, 80);
+  const metaQuery = useQuery({
+    queryKey: ["miniapp-feedback-meta", webAppBase, queryScopeKey],
+    queryFn: () => fetchMiniappFeedbackMetaJsonp(webAppBase, initData),
     enabled: Boolean(webAppBase && initData),
+    staleTime: FEEDBACK_META_STALE_MS,
+    refetchInterval: FEEDBACK_META_REFETCH_MS,
+    refetchOnWindowFocus: false,
+  });
+
+  const snapshotId =
+    metaQuery.data?.ok && metaQuery.data.feedback_snapshot_id
+      ? metaQuery.data.feedback_snapshot_id
+      : "fallback";
+
+  const { data, isPending, isError, error, refetch, isFetching } = useQuery({
+    queryKey: ["miniapp-feedback-richieste", webAppBase, queryScopeKey, snapshotId],
+    queryFn: () => fetchMiniappFeedbackDaLasciareJsonp(webAppBase, initData),
+    enabled: Boolean(webAppBase && initData) && (metaQuery.isSuccess || metaQuery.isError),
     staleTime: FEEDBACK_LIST_STALE_MS,
     refetchOnWindowFocus: false,
   });
@@ -242,14 +260,19 @@ const PrenotazioniFeedbackPanel = ({
           variant="outline"
           size="icon"
           className="shrink-0 rounded-lg"
-          disabled={isFetching}
-          onClick={() => refetch()}
+          disabled={isFetching || metaQuery.isFetching}
+          onClick={() => {
+            void metaQuery.refetch();
+            void refetch();
+          }}
           aria-label={
-            isFetching ? "Aggiornamento in corso" : "Aggiorna richieste feedback"
+            isFetching || metaQuery.isFetching
+              ? "Aggiornamento in corso"
+              : "Aggiorna richieste feedback"
           }
         >
           <RefreshCw
-            className={isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
+            className={isFetching || metaQuery.isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"}
             strokeWidth={1.25}
             aria-hidden
           />

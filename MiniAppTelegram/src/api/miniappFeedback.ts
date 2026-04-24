@@ -10,10 +10,73 @@ export type MiniappFeedbackListaResponse = {
   feedback_richieste?: MiniappFeedbackRichiesta[];
 };
 
+export type MiniappFeedbackMetaResponse = {
+  ok: boolean;
+  error?: string;
+  feedback_snapshot_id?: string;
+  last_scan_ts?: number;
+  scanned_count?: number;
+};
+
 export type MiniappFeedbackInviaResponse = {
   ok: boolean;
   error?: string;
 };
+
+export function fetchMiniappFeedbackMetaJsonp(
+  baseRaw: string,
+  initData: string,
+): Promise<MiniappFeedbackMetaResponse> {
+  const base = baseRaw.replace(/\/$/, "");
+  if (!base) {
+    return Promise.reject(new Error("Base URL web app mancante."));
+  }
+  if (!initData) {
+    return Promise.reject(
+      new Error("Dati Telegram assenti: apri la mini app da Telegram."),
+    );
+  }
+
+  return new Promise((resolve, reject) => {
+    const cbName = `lmb_fbm_${Date.now()}`;
+    const script = document.createElement("script");
+
+    const cleanup = () => {
+      try {
+        delete (window as unknown as Record<string, unknown>)[cbName];
+      } catch {
+        /* ignore */
+      }
+      script.remove();
+    };
+
+    (window as unknown as Record<string, unknown>)[cbName] = (data: unknown) => {
+      cleanup();
+      resolve(data as MiniappFeedbackMetaResponse);
+    };
+
+    let url: URL;
+    try {
+      url = new URL(base);
+    } catch {
+      cleanup();
+      reject(new Error("URL web app non valido."));
+      return;
+    }
+    url.searchParams.set("mode", "api_miniapp");
+    url.searchParams.set("action", "feedback_meta");
+    url.searchParams.set("init_data", initData);
+    url.searchParams.set("callback", cbName);
+
+    script.src = url.toString();
+    script.async = true;
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("Errore di rete o URL troppo lungo."));
+    };
+    document.head.appendChild(script);
+  });
+}
 
 /**
  * JSONP: `mode=api_miniapp&action=feedback_da_lasciare&init_data=…`
