@@ -19,7 +19,6 @@ export function useRadarOfferte({
   viewMode,
   isMapFullscreen,
   isMapZoomedOut,
-  viewportBucket,
 }: {
   webAppBase: string;
   activeTab: string;
@@ -27,7 +26,6 @@ export function useRadarOfferte({
   viewMode: "map" | "list";
   isMapFullscreen: boolean;
   isMapZoomedOut: boolean;
-  viewportBucket?: string | null;
 }) {
   const mapCompactRadarScope =
     activeTab === "radar" &&
@@ -41,7 +39,6 @@ export function useRadarOfferte({
       MINIAPP_OFFERTE_QUERY_ROOT,
       webAppBase,
       scope,
-      viewportBucket ?? "no-viewport",
       userPos?.lat ?? null,
       userPos?.lng ?? null,
     ],
@@ -55,6 +52,7 @@ export function useRadarOfferte({
     enabled: Boolean(webAppBase),
     refetchInterval: false,
     refetchOnWindowFocus: false,
+    placeholderData: (previousData) => previousData,
   });
 
   const radarDrops = useMemo(() => {

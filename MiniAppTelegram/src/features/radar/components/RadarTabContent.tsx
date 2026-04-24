@@ -96,12 +96,12 @@ const RadarTabContent = ({
         </div>
       )}
 
-      {isPending && webAppBase && (
+      {isPending && webAppBase && !data?.ok && (
         <p className="text-sm text-muted-foreground">Caricamento offerte…</p>
       )}
       {!isPending && viewMode === "map" && userPos && radarDrops.length === 0 && data?.ok && (
         <p className="mb-3 text-sm text-muted-foreground">
-          Nessuna offerta attiva nel raggio da te in questo momento.
+          Nessuna offerta attiva vicino a te.
         </p>
       )}
 
