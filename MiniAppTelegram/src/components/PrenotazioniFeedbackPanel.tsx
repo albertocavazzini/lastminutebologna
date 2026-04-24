@@ -10,7 +10,7 @@ import { getTelegramInitData } from "@/lib/telegramWebApp";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-const FEEDBACK_DELAY_MS = 30 * 60_000;
+const FEEDBACK_DELAY_MS = 0;
 const FEEDBACK_UNLOCK_CACHE_KEY = "lmb-feedback-unlock-v1";
 const FEEDBACK_LIST_STALE_MS = 5 * 60_000;
 
@@ -118,8 +118,7 @@ function FeedbackCard({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Stessa valutazione che puoi inviare dal link Telegram dopo 30 minuti dal
-        ritiro: qui la lasci direttamente dalla mini app.
+        Puoi lasciare la valutazione subito dopo la conferma del QR al locale.
       </p>
 
       <div className="flex justify-center gap-1.5 py-1">
