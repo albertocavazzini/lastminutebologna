@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { inviaMiniappAggiornaPosizioneJsonp } from "@/api/miniappPosizione";
 import {
   clearGeoCache,
   getGeoCacheSavedAt,
@@ -11,8 +12,10 @@ import {
 } from "@/lib/geo/userMapPosition";
 
 const REFINE_MAP_MIN_INTERVAL_MS = 30 * 60 * 1000;
+/** Evita burst JSONP verso AppScript (salvaPosizioneUtente ha già dedup lato server). */
+const FIREBASE_POSIZIONE_MIN_INTERVAL_MS = 120_000;
 
-export function useRadarLocation() {
+export function useRadarLocation(webAppBase: string, initData: string) {
   const [userPos, setUserPos] = useState<UserMapPosition | null>(() =>
     typeof window !== "undefined" ? readGeoCache() : null,
   );
@@ -22,6 +25,27 @@ export function useRadarLocation() {
   const [geoDenied, setGeoDenied] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
   const prevViewMode = useRef<"map" | "list">("list");
+  const lastFirebasePosSyncMs = useRef(0);
+
+  const syncPosizioneRadarFirebase = useCallback(
+    (u: UserMapPosition) => {
+      if (!webAppBase?.trim() || !initData) return;
+      const now = Date.now();
+      if (
+        lastFirebasePosSyncMs.current > 0 &&
+        now - lastFirebasePosSyncMs.current < FIREBASE_POSIZIONE_MIN_INTERVAL_MS
+      ) {
+        return;
+      }
+      lastFirebasePosSyncMs.current = now;
+      void inviaMiniappAggiornaPosizioneJsonp(webAppBase, initData, u.lat, u.lng).catch(
+        () => {
+          /* best-effort: radar offline non blocca UX */
+        },
+      );
+    },
+    [webAppBase, initData],
+  );
 
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -36,6 +60,7 @@ export function useRadarLocation() {
         const u = userMapPositionFromGeolocation(pos);
         setUserPos(u);
         writeGeoCache(u);
+        syncPosizioneRadarFirebase(u);
         setGeoDone(true);
         setGeoDenied(false);
         setGeoLoading(false);
@@ -57,7 +82,7 @@ export function useRadarLocation() {
         timeout: 25_000,
       },
     );
-  }, []);
+  }, [syncPosizioneRadarFirebase]);
 
   const refineLocation = useCallback(() => {
     if (!navigator.geolocation) return;
@@ -66,6 +91,7 @@ export function useRadarLocation() {
         const u = userMapPositionFromGeolocation(pos);
         setUserPos(u);
         writeGeoCache(u);
+        syncPosizioneRadarFirebase(u);
       },
       () => {},
       {
@@ -74,7 +100,7 @@ export function useRadarLocation() {
         timeout: 25_000,
       },
     );
-  }, []);
+  }, [syncPosizioneRadarFirebase]);
 
   useEffect(() => {
     if (readGeoCache()) return;

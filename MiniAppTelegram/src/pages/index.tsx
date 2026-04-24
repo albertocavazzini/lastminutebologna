@@ -39,6 +39,8 @@ const Index = () => {
   const [prenotazioniSubView, setPrenotazioniSubView] =
     useState<PrenotazioniSubView>("lista");
   const [selectedDrop, setSelectedDrop] = useState<Drop | null>(null);
+  const webAppBase = projectEnv.appsScriptWebAppBase?.trim() ?? "";
+  const initData = getTelegramInitData();
   const {
     userPos,
     geoDone,
@@ -46,10 +48,7 @@ const Index = () => {
     geoLoading,
     requestLocation,
     handleViewModeChange,
-  } = useRadarLocation();
-
-  const webAppBase = projectEnv.appsScriptWebAppBase?.trim() ?? "";
-  const initData = getTelegramInitData();
+  } = useRadarLocation(webAppBase, initData);
 
   useEffect(() => {
     handleViewModeChange(activeTab, viewMode);
