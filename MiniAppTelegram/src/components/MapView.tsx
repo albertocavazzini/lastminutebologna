@@ -121,6 +121,8 @@ const MapView = ({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const onZoomLevelChangeRef = useRef<MapViewProps["onZoomLevelChange"]>(onZoomLevelChange);
+  const onViewChangeRef = useRef<MapViewProps["onViewChange"]>(onViewChange);
   const hasAutoFittedRef = useRef(false);
   const lastUserPosKeyRef = useRef("");
   const sawMissingUserRef = useRef(false);
@@ -228,6 +230,10 @@ const MapView = ({
     return BOLOGNA_CENTER;
   }, [initialView, userPos, drops]);
   const initialZoom = initialView?.zoom ?? 13;
+  const initialCameraRef = useRef<{ center: [number, number]; zoom: number } | null>(null);
+  if (!initialCameraRef.current) {
+    initialCameraRef.current = { center, zoom: initialZoom };
+  }
 
   useEffect(() => {
     setLiveZoom(initialZoom);
@@ -243,17 +249,28 @@ const MapView = ({
   const radarRadiusPx = userPos
     ? radarRangeM / Math.max(0.0001, metersPerPixelAtLat(userPos.lat))
     : 0;
+
+  useEffect(() => {
+    onZoomLevelChangeRef.current = onZoomLevelChange;
+  }, [onZoomLevelChange]);
+
+  useEffect(() => {
+    onViewChangeRef.current = onViewChange;
+  }, [onViewChange]);
+
   useEffect(() => {
     if (!userPos) sawMissingUserRef.current = true;
   }, [userPos]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
+    const initialCamera = initialCameraRef.current;
+    if (!initialCamera) return;
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
       style: MAP_STYLE_CARTO_POSITRON,
-      center: [center[1], center[0]],
-      zoom: initialZoom,
+      center: [initialCamera.center[1], initialCamera.center[0]],
+      zoom: initialCamera.zoom,
       minZoom: 1,
       maxZoom: 20,
       attributionControl: false,
@@ -265,13 +282,13 @@ const MapView = ({
     const emitView = () => {
       const c = map.getCenter();
       const z = map.getZoom();
-      onZoomLevelChange?.(z);
-      onViewChange?.({ centerLat: c.lat, centerLng: c.lng, zoom: z });
+      onZoomLevelChangeRef.current?.(z);
+      onViewChangeRef.current?.({ centerLat: c.lat, centerLng: c.lng, zoom: z });
     };
     const handleZoom = () => {
       const z = map.getZoom();
       setLiveZoom(z);
-      onZoomLevelChange?.(z);
+      onZoomLevelChangeRef.current?.(z);
     };
     const handleZoomEnd = () => emitView();
     const handleMoveEnd = () => emitView();
@@ -290,7 +307,7 @@ const MapView = ({
       map.remove();
       mapRef.current = null;
     };
-  }, [center, initialZoom, onViewChange, onZoomLevelChange]);
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
