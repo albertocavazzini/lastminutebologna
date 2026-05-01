@@ -1,10 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import maplibregl, { LngLatBounds } from "maplibre-gl";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  ZoomControl,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+import L from "leaflet";
 import type { Drop } from "@/data/mockDrops";
 import { encodeGeohash } from "@/lib/geo/geohash";
 import { haversineKm } from "@/lib/geo/distanceKm";
 import type { UserMapPosition } from "@/lib/geo/userMapPosition";
-import "maplibre-gl/dist/maplibre-gl.css";
+import "leaflet/dist/leaflet.css";
 
 /** Centro Bologna (MVP radar last minute). */
 const BOLOGNA_CENTER: [number, number] = [44.4949, 11.3426];
@@ -13,8 +21,15 @@ const BOLOGNA_CENTER: [number, number] = [44.4949, 11.3426];
 const INTRO_OVERVIEW_ZOOM = 11;
 const INTRO_TARGET_ZOOM = 15;
 
-const MAP_STYLE_CARTO_POSITRON =
-  "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+/**
+ * Basemap CARTO (CDN dedicato), dati OSM — adatto a MVP senza chiave API.
+ * @see https://carto.com/basemaps/
+ */
+const TILE_URL_CARTO_POSITRON =
+  "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+const TILE_ATTRIBUTION_CARTO =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> ' +
+  '&copy; <a href="https://carto.com/attributions">CARTO</a>';
 
 export interface MapViewProps {
   drops: Drop[];
@@ -64,21 +79,171 @@ function offsetLatLngMeters(
   return [lat + dLat, lng + dLng];
 }
 
+/**
+ * Se la posizione arriva dopo il primo render (GPS lento), mostra prima un overview
+ * sulla città e poi anima verso l’utente. Con posizione già disponibile (cache) non fa nulla.
+ */
+function MapIntroFlyFromOverview({
+  userPos,
+  initialView,
+  autoFitOnMount,
+}: {
+  userPos: UserMapPosition | null;
+  initialView: MapViewProps["initialView"];
+  autoFitOnMount: boolean;
+}) {
+  const map = useMap();
+  const sawMissingUserRef = useRef(false);
+  const introRanRef = useRef(false);
+
+  useEffect(() => {
+    if (!userPos) sawMissingUserRef.current = true;
+  }, [userPos]);
+
+  useLayoutEffect(() => {
+    if (!autoFitOnMount || initialView) return;
+    if (!userPos || !sawMissingUserRef.current) return;
+    if (introRanRef.current) return;
+    introRanRef.current = true;
+
+    map.stop();
+    map.setView(BOLOGNA_CENTER, INTRO_OVERVIEW_ZOOM, { animate: false });
+    const raf = requestAnimationFrame(() => {
+      map.flyTo([userPos.lat, userPos.lng], INTRO_TARGET_ZOOM, {
+        duration: 0.9,
+        easeLinearity: 0.22,
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [map, userPos, initialView, autoFitOnMount]);
+
+  return null;
+}
+
+function MapBounds({
+  drops,
+  userPos,
+  autoFitOnMount = true,
+}: {
+  drops: Drop[];
+  userPos: UserMapPosition | null;
+  autoFitOnMount?: boolean;
+}) {
+  const map = useMap();
+  const hasAutoFittedRef = useRef(false);
+  const lastUserPosKeyRef = useRef<string>("");
+
+  useEffect(() => {
+    const userPosKey = userPos ? `${userPos.lat.toFixed(6)}:${userPos.lng.toFixed(6)}` : "";
+    const prevKey = lastUserPosKeyRef.current;
+    if (userPosKey === prevKey) return;
+    // Prima posizione GPS dopo mount senza utente: non rifare fitBounds (altrimenti
+    // sovrascrive l’overview + fly di MapIntroFlyFromOverview).
+    if (prevKey === "" && userPosKey !== "") {
+      lastUserPosKeyRef.current = userPosKey;
+      return;
+    }
+    hasAutoFittedRef.current = false;
+    lastUserPosKeyRef.current = userPosKey;
+  }, [userPos]);
+
+  useEffect(() => {
+    if (!autoFitOnMount) return;
+    if (hasAutoFittedRef.current) return;
+
+    const points: L.LatLngExpression[] = drops.map((d) => [d.lat, d.lng]);
+    if (userPos) {
+      points.push([userPos.lat, userPos.lng]);
+    }
+
+    if (points.length === 0) {
+      map.setView(BOLOGNA_CENTER, 12);
+      hasAutoFittedRef.current = true;
+      return;
+    }
+
+    if (points.length === 1) {
+      const p = points[0] as [number, number];
+      map.setView(p, 17);
+      hasAutoFittedRef.current = true;
+      return;
+    }
+
+    map.fitBounds(L.latLngBounds(points), {
+      padding: [48, 48],
+      maxZoom: 18,
+    });
+    hasAutoFittedRef.current = true;
+  }, [map, drops, userPos, autoFitOnMount]);
+
+  return null;
+}
+
+function MapZoomListener({
+  onZoomLevelChange,
+  onViewChange,
+}: {
+  onZoomLevelChange?: (zoom: number) => void;
+  onViewChange?: (view: { centerLat: number; centerLng: number; zoom: number }) => void;
+}) {
+  const map = useMapEvents({
+    zoom: () => {
+      onZoomLevelChange?.(map.getZoom());
+    },
+    zoomend: () => {
+      onZoomLevelChange?.(map.getZoom());
+      const c = map.getCenter();
+      onViewChange?.({ centerLat: c.lat, centerLng: c.lng, zoom: map.getZoom() });
+    },
+    moveend: () => {
+      const c = map.getCenter();
+      onViewChange?.({ centerLat: c.lat, centerLng: c.lng, zoom: map.getZoom() });
+    },
+  });
+
+  useEffect(() => {
+    onZoomLevelChange?.(map.getZoom());
+    const c = map.getCenter();
+    onViewChange?.({ centerLat: c.lat, centerLng: c.lng, zoom: map.getZoom() });
+  }, [map, onZoomLevelChange, onViewChange]);
+
+  return null;
+}
+
+function MapLiveZoomTracker({
+  onZoomChange,
+}: {
+  onZoomChange: (zoom: number) => void;
+}) {
+  const map = useMapEvents({
+    zoom: () => {
+      onZoomChange(map.getZoom());
+    },
+  });
+
+  useEffect(() => {
+    onZoomChange(map.getZoom());
+  }, [map, onZoomChange]);
+
+  return null;
+}
+
 /** Pin “posizione” classico (SVG), distinto dai cerchi cluster blu. */
-function nearbyOfferLocationPinElement(fillColor: string): HTMLDivElement {
-  const el = document.createElement("div");
-  el.className = "lmb-nearby-offer-pin";
-  el.style.width = "30px";
-  el.style.height = "40px";
-  el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40" aria-hidden="true">
+function nearbyOfferLocationPinIcon(fillColor: string): L.DivIcon {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40" aria-hidden="true">
     <path d="M15 2C8.92 2 4 6.82 4 12.8c0 7.2 11 21.2 11 21.2s11-14 11-21.2C26 6.82 21.08 2 15 2z"
       fill="${fillColor}" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
     <circle cx="15" cy="13" r="3.2" fill="#ffffff"/>
   </svg>`;
-  return el;
+  return L.divIcon({
+    className: "lmb-nearby-offer-pin",
+    iconSize: [30, 40],
+    iconAnchor: [15, 38],
+    html: svg,
+  });
 }
 
-function circularOverlayElement({
+function circularOverlayIcon({
   radiusPx,
   borderColor,
   borderWidthPx,
@@ -92,20 +257,23 @@ function circularOverlayElement({
   borderStyle?: "solid" | "dashed";
   fillColor: string;
   opacity?: number;
-}): HTMLDivElement {
+}): L.DivIcon {
   const diameterPx = Math.max(2, Math.round(radiusPx * 2));
-  const el = document.createElement("div");
-  el.className = "lmb-overlay-circle";
-  Object.assign(el.style, {
-    width: `${diameterPx}px`,
-    height: `${diameterPx}px`,
-    borderRadius: "9999px",
-    border: `${borderWidthPx}px ${borderStyle} ${borderColor}`,
-    background: fillColor,
-    opacity: String(opacity),
-    boxSizing: "border-box",
+  return L.divIcon({
+    className: "lmb-overlay-circle",
+    iconSize: [diameterPx, diameterPx],
+    iconAnchor: [diameterPx / 2, diameterPx / 2],
+    html: `<span style="
+      display:block;
+      width:${diameterPx}px;
+      height:${diameterPx}px;
+      border-radius:9999px;
+      border:${borderWidthPx}px ${borderStyle} ${borderColor};
+      background:${fillColor};
+      opacity:${opacity};
+      box-sizing:border-box;
+    "></span>`,
   });
-  return el;
 }
 
 const MapView = ({
@@ -118,15 +286,6 @@ const MapView = ({
   initialView,
   autoFitOnMount = true,
 }: MapViewProps) => {
-  const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
-  const markersRef = useRef<maplibregl.Marker[]>([]);
-  const onZoomLevelChangeRef = useRef<MapViewProps["onZoomLevelChange"]>(onZoomLevelChange);
-  const onViewChangeRef = useRef<MapViewProps["onViewChange"]>(onViewChange);
-  const hasAutoFittedRef = useRef(false);
-  const lastUserPosKeyRef = useRef("");
-  const sawMissingUserRef = useRef(false);
-  const introRanRef = useRef(false);
   const radarRangeM = Math.max(0, Math.round(radarRangeKm * 1000));
   const [liveZoom, setLiveZoom] = useState(initialView?.zoom ?? 13);
   const nearbyDrops = useMemo(
@@ -230,249 +389,139 @@ const MapView = ({
     return BOLOGNA_CENTER;
   }, [initialView, userPos, drops]);
   const initialZoom = initialView?.zoom ?? 13;
-  const initialCameraRef = useRef<{ center: [number, number]; zoom: number } | null>(null);
-  if (!initialCameraRef.current) {
-    initialCameraRef.current = { center, zoom: initialZoom };
-  }
 
   useEffect(() => {
     setLiveZoom(initialZoom);
   }, [initialZoom]);
 
   const currentZoom = Number.isFinite(liveZoom) ? liveZoom : initialZoom;
-  const metersPerPixelAtLat = useCallback(
-    (lat: number) =>
-      (EARTH_CIRCUMFERENCE_M_PER_PX_AT_Z0 * Math.cos((lat * Math.PI) / 180)) /
-      2 ** currentZoom,
-    [currentZoom],
-  );
+  const metersPerPixelAtLat = (lat: number) =>
+    (EARTH_CIRCUMFERENCE_M_PER_PX_AT_Z0 * Math.cos((lat * Math.PI) / 180)) /
+    2 ** currentZoom;
   const radarRadiusPx = userPos
     ? radarRangeM / Math.max(0.0001, metersPerPixelAtLat(userPos.lat))
     : 0;
+  const userDotIcon = circularOverlayIcon({
+    radiusPx: 7,
+    borderColor: "#ffffff",
+    borderWidthPx: 2,
+    fillColor: "#484848",
+  });
+  const radarCircleIcon =
+    userPos && radarRangeM > 0
+      ? circularOverlayIcon({
+          radiusPx: radarRadiusPx,
+          borderColor: "#059669",
+          borderWidthPx: 2,
+          borderStyle: "dashed",
+          fillColor: "rgba(16,185,129,0.08)",
+          opacity: 0.9,
+        })
+      : null;
 
-  useEffect(() => {
-    onZoomLevelChangeRef.current = onZoomLevelChange;
-  }, [onZoomLevelChange]);
-
-  useEffect(() => {
-    onViewChangeRef.current = onViewChange;
-  }, [onViewChange]);
-
-  useEffect(() => {
-    if (!userPos) sawMissingUserRef.current = true;
-  }, [userPos]);
-
-  useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
-    const initialCamera = initialCameraRef.current;
-    if (!initialCamera) return;
-    const map = new maplibregl.Map({
-      container: mapContainerRef.current,
-      style: MAP_STYLE_CARTO_POSITRON,
-      center: [initialCamera.center[1], initialCamera.center[0]],
-      zoom: initialCamera.zoom,
-      minZoom: 1,
-      maxZoom: 20,
-      attributionControl: false,
-    });
-    mapRef.current = map;
-    map.scrollZoom.enable();
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
-
-    const emitView = () => {
-      const c = map.getCenter();
-      const z = map.getZoom();
-      onZoomLevelChangeRef.current?.(z);
-      onViewChangeRef.current?.({ centerLat: c.lat, centerLng: c.lng, zoom: z });
-    };
-    const handleZoom = () => {
-      const z = map.getZoom();
-      setLiveZoom(z);
-      onZoomLevelChangeRef.current?.(z);
-    };
-    const handleZoomEnd = () => emitView();
-    const handleMoveEnd = () => emitView();
-
-    map.on("zoom", handleZoom);
-    map.on("zoomend", handleZoomEnd);
-    map.on("moveend", handleMoveEnd);
-    map.once("load", emitView);
-
-    return () => {
-      map.off("zoom", handleZoom);
-      map.off("zoomend", handleZoomEnd);
-      map.off("moveend", handleMoveEnd);
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current = [];
-      map.remove();
-      mapRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !autoFitOnMount) return;
-    const userPosKey = userPos ? `${userPos.lat.toFixed(6)}:${userPos.lng.toFixed(6)}` : "";
-    const prevKey = lastUserPosKeyRef.current;
-    if (userPosKey !== prevKey) {
-      if (prevKey === "" && userPosKey !== "") {
-        lastUserPosKeyRef.current = userPosKey;
-        return;
-      }
-      hasAutoFittedRef.current = false;
-      lastUserPosKeyRef.current = userPosKey;
-    }
-    if (hasAutoFittedRef.current) return;
-
-    const points = drops.map((d) => [d.lat, d.lng] as [number, number]);
-    if (userPos) points.push([userPos.lat, userPos.lng]);
-
-    if (points.length === 0) {
-      map.jumpTo({ center: [BOLOGNA_CENTER[1], BOLOGNA_CENTER[0]], zoom: 12 });
-      hasAutoFittedRef.current = true;
-      return;
-    }
-    if (points.length === 1) {
-      const [lat, lng] = points[0];
-      map.jumpTo({ center: [lng, lat], zoom: 17 });
-      hasAutoFittedRef.current = true;
-      return;
-    }
-    const bounds = new LngLatBounds();
-    points.forEach(([lat, lng]) => bounds.extend([lng, lat]));
-    map.fitBounds(bounds, { padding: 48, maxZoom: 18, duration: 0 });
-    hasAutoFittedRef.current = true;
-  }, [autoFitOnMount, drops, userPos]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    if (!autoFitOnMount || initialView) return;
-    if (!userPos || !sawMissingUserRef.current || introRanRef.current) return;
-    introRanRef.current = true;
-    map.stop();
-    map.jumpTo({ center: [BOLOGNA_CENTER[1], BOLOGNA_CENTER[0]], zoom: INTRO_OVERVIEW_ZOOM });
-    const raf = requestAnimationFrame(() => {
-      map.flyTo({
-        center: [userPos.lng, userPos.lat],
-        zoom: INTRO_TARGET_ZOOM,
-        duration: 900,
-        essential: true,
-      });
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [autoFitOnMount, initialView, userPos]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !initialView) return;
-    map.jumpTo({
-      center: [initialView.centerLng, initialView.centerLat],
-      zoom: initialView.zoom,
-    });
-  }, [initialView]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    markersRef.current.forEach((marker) => marker.remove());
-    const nextMarkers: maplibregl.Marker[] = [];
-
-    if (userPos && radarRangeM > 0) {
-      nextMarkers.push(
-        new maplibregl.Marker({
-          element: circularOverlayElement({
-            radiusPx: radarRadiusPx,
-            borderColor: "#059669",
-            borderWidthPx: 2,
-            borderStyle: "dashed",
-            fillColor: "rgba(16,185,129,0.08)",
-            opacity: 0.9,
-          }),
-          anchor: "center",
-        }).setLngLat([userPos.lng, userPos.lat]).addTo(map),
-      );
-    }
-    if (userPos) {
-      nextMarkers.push(
-        new maplibregl.Marker({
-          element: circularOverlayElement({
-            radiusPx: 7,
-            borderColor: "#ffffff",
-            borderWidthPx: 2,
-            fillColor: "#484848",
-          }),
-          anchor: "center",
-        }).setLngLat([userPos.lng, userPos.lat]).addTo(map),
-      );
-    }
-
-    nearbyDrops.forEach((drop) => {
-      const marker = new maplibregl.Marker({
-        element: nearbyOfferLocationPinElement(
-          drop.isGolden ? "#D4B483" : "hsl(11, 100%, 38%)",
-        ),
-        anchor: "bottom",
-      })
-        .setLngLat([drop.lng, drop.lat])
-        .addTo(map);
-      marker.getElement().addEventListener("click", () => onSelectDrop(drop));
-      nextMarkers.push(marker);
-    });
-
-    farClusters.forEach((cluster) => {
-      const px = cluster.radiusM / Math.max(0.0001, metersPerPixelAtLat(cluster.lat));
-      nextMarkers.push(
-        new maplibregl.Marker({
-          element: circularOverlayElement({
+  return (
+    <div className="relative h-full w-full overflow-hidden rounded-2xl border border-border/40 shadow-inner">
+      <MapContainer
+        center={center}
+        zoom={initialZoom}
+        className="lmb-map z-0 h-full w-full [&_.leaflet-control-attribution]:text-lmb-label"
+        scrollWheelZoom
+        zoomControl={false}
+        attributionControl={false}
+      >
+        <TileLayer
+          attribution={TILE_ATTRIBUTION_CARTO}
+          url={TILE_URL_CARTO_POSITRON}
+          subdomains="abcd"
+          maxZoom={20}
+          maxNativeZoom={20}
+        />
+        <MapIntroFlyFromOverview
+          userPos={userPos}
+          initialView={initialView}
+          autoFitOnMount={autoFitOnMount}
+        />
+        <MapBounds drops={drops} userPos={userPos} autoFitOnMount={autoFitOnMount} />
+        <MapZoomListener onZoomLevelChange={onZoomLevelChange} onViewChange={onViewChange} />
+        <MapLiveZoomTracker onZoomChange={setLiveZoom} />
+        <ZoomControl position="topright" />
+        {userPos && radarCircleIcon ? (
+          <Marker position={[userPos.lat, userPos.lng]} icon={radarCircleIcon} interactive={false} />
+        ) : null}
+        {userPos ? (
+          <Marker position={[userPos.lat, userPos.lng]} icon={userDotIcon} interactive={false} />
+        ) : null}
+        {nearbyDrops.map((drop) => (
+          <Marker
+            key={drop.id}
+            position={[drop.lat, drop.lng]}
+            icon={nearbyOfferLocationPinIcon(
+              drop.isGolden ? "#D4B483" : "hsl(11, 100%, 38%)",
+            )}
+            eventHandlers={{
+              click: () => {
+                onSelectDrop(drop);
+              },
+            }}
+          />
+        ))}
+        {farClusters.map((cluster) => {
+          const px = cluster.radiusM / Math.max(0.0001, metersPerPixelAtLat(cluster.lat));
+          const hotspotIcon = circularOverlayIcon({
             radiusPx: Math.max(16, Math.min(240, px)),
             borderColor: "#2563eb",
             borderWidthPx: 2,
             borderStyle: "dashed",
             fillColor: "rgba(59,130,246,0.18)",
             opacity: 0.85,
-          }),
-          anchor: "center",
-        }).setLngLat([cluster.lng, cluster.lat]).addTo(map),
-      );
-
-      const badge = document.createElement("div");
-      badge.className = "lmb-hotspot-badge";
-      badge.style.width = "44px";
-      badge.style.height = "32px";
-      badge.style.borderRadius = "9999px";
-      badge.style.background = "#1d4ed8";
-      badge.style.color = "white";
-      badge.style.border = "2px solid white";
-      badge.style.boxShadow = "0 2px 8px rgba(0,0,0,0.25)";
-      badge.style.display = "flex";
-      badge.style.alignItems = "center";
-      badge.style.justifyContent = "center";
-      badge.style.fontSize = "18px";
-      badge.style.fontWeight = "700";
-      badge.style.lineHeight = "1";
-      badge.textContent = String(cluster.count);
-      nextMarkers.push(
-        new maplibregl.Marker({ element: badge, anchor: "center" })
-          .setLngLat([cluster.lng, cluster.lat])
-          .addTo(map),
-      );
-    });
-
-    markersRef.current = nextMarkers;
-  }, [
-    farClusters,
-    metersPerPixelAtLat,
-    nearbyDrops,
-    onSelectDrop,
-    radarRadiusPx,
-    radarRangeM,
-    userPos,
-  ]);
-
-  return (
-    <div className="relative h-full w-full overflow-hidden rounded-2xl border border-border/40 shadow-inner">
-      <div ref={mapContainerRef} className="lmb-map z-0 h-full w-full" />
+          });
+          return (
+            <Marker
+              key={`hotspot-${cluster.key}`}
+              position={[cluster.lat, cluster.lng]}
+              icon={hotspotIcon}
+              interactive={false}
+            />
+          );
+        })}
+        {farClusters.map((cluster) => (
+          <Marker
+            key={`hotspot-count-${cluster.key}`}
+            position={[cluster.lat, cluster.lng]}
+            icon={L.divIcon({
+              className: "lmb-hotspot-badge",
+              iconSize: [44, 32],
+              iconAnchor: [22, 16],
+              html: `<div style="
+                position: relative;
+                width: 44px;
+                height: 32px;
+              ">
+                <div style="
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  width: 44px;
+                  height: 32px;
+                  border-radius: 9999px;
+                  background: #1d4ed8;
+                  color: white;
+                  border: 2px solid white;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 18px;
+                  font-weight: 700;
+                  line-height: 1;
+                ">
+                  <span>${cluster.count}</span>
+                </div>
+              </div>`,
+            })}
+          />
+        ))}
+      </MapContainer>
 
       <div className="pointer-events-none absolute bottom-4 left-4 z-20 max-w-[11rem] rounded-2xl border border-border/50 bg-card/95 px-3 py-2 text-xs shadow-card backdrop-blur-sm">
         <div className="space-y-1">
